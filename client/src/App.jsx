@@ -1,121 +1,104 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+/**
+ * App.jsx
+ *
+ * Application root with arrow functions.
+ */
 
-function App() {
-  const [count, setCount] = useState(0)
+import React, { Suspense, lazy } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { AuthProvider } from "./context/AuthContext";
+import { ToastProvider } from "./context/ToastContext";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import PublicOnlyRoute from "./components/auth/PublicOnlyRoute";
+import Spinner from "./components/ui/Spinner";
+
+/* ---- Lazy-load pages (code splitting for faster initial load) ---- */
+const HomePage               = lazy(() => import("./pages/HomePage"));
+const RegisterPage           = lazy(() => import("./pages/RegisterPage"));
+const LoginPage              = lazy(() => import("./pages/LoginPage"));
+const ForgotPasswordPage     = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage      = lazy(() => import("./pages/ResetPasswordPage"));
+const PrivacyPage            = lazy(() => import("./pages/PrivacyPage"));
+const TermsPage              = lazy(() => import("./pages/TermsPage"));
+const DashboardPage          = lazy(() => import("./pages/DashboardPage"));
+const CreateChamberPage      = lazy(() => import("./pages/CreateChamberPage"));
+const CreatePrescriptionPage = lazy(() => import("./pages/CreatePrescriptionPage"));
+
+const pageTitles = {
+  "/": "RxDesk — Doctor Prescription Generator",
+  "/register": "Create Account — RxDesk",
+  "/login": "Doctor Login — RxDesk",
+  "/forgot-password": "Forgot Password — RxDesk",
+  "/reset-password": "Reset Password — RxDesk",
+  "/privacy": "Privacy Policy — RxDesk",
+  "/terms": "Terms of Use — RxDesk",
+  "/dashboard": "Dashboard — RxDesk",
+  "/chambers/new": "Create Chamber — RxDesk",
+  "/prescriptions/new": "Create Prescription — RxDesk",
+};
+
+const PageTitle = () => {
+  const { pathname } = useLocation();
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <Helmet>
+      <title>{pageTitles[pathname] ?? pageTitles["/"]}</title>
+    </Helmet>
+  );
+};
 
-      <div className="ticks"></div>
+/* ---- Full-page suspense fallback ---- */
+const PageLoader = () => (
+  <div
+    className="fixed inset-0 flex items-center justify-center"
+    style={{ background: "var(--color-page)" }}
+    aria-label="Loading page…"
+    role="status"
+  >
+    <Spinner size={32} />
+  </div>
+);
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+const App = () => (
+  <BrowserRouter>
+    <PageTitle />
+    <ToastProvider>
+      <AuthProvider>
+        {/* Accessibility: skip to main content — first focusable element */}
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* ---- Public routes ---- */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
 
-export default App
+            {/* ---- Public-only routes (redirect to /dashboard if signed in) ---- */}
+            <Route element={<PublicOnlyRoute />}>
+              <Route path="/register"        element={<RegisterPage />} />
+              <Route path="/login"           element={<LoginPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password"  element={<ResetPasswordPage />} />
+            </Route>
+
+            {/* ---- Protected routes (redirect to /login if not signed in) ---- */}
+            {/* <Route element={<ProtectedRoute />}> */}
+              <Route path="/dashboard"          element={<DashboardPage />} />
+              <Route path="/chambers/new"       element={<CreateChamberPage />} />
+              <Route path="/prescriptions/new"  element={<CreatePrescriptionPage />} />
+            {/* </Route> */}
+
+            {/* ---- 404 fallback ---- */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
+      </AuthProvider>
+    </ToastProvider>
+  </BrowserRouter>
+);
+
+export default App;
