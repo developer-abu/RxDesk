@@ -19,13 +19,16 @@ export const createChamberSchema = z.object({
   visitingDays: z
     .array(z.string().trim())
     .min(1, "Select at least one visiting day"),
-  visitingHours: z
-    .string({ required_error: "Visiting hours are required" })
-    .trim()
-    .min(2, "Visiting hours are required")
-    .max(200, "Visiting hours cannot exceed 200 characters"),
+  visitingSessions: z
+    .array(
+      z.object({
+        from: z.string().trim().min(1, "Start time is required"),
+        to: z.string().trim().min(1, "End time is required"),
+      })
+    )
+    .min(1, "Add at least one visiting session")
+    .max(2, "A maximum of two visiting sessions is allowed"),
   doctorName: z.string().trim().max(100).optional().default(""),
   qualifications: z.string().trim().max(200).optional().default(""),
   registrationNo: z.string().trim().max(60).optional().default(""),
 });
-

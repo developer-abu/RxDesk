@@ -6,7 +6,6 @@ import { signToken } from "../utils/jwtUtils.js";
 import { sendOtpEmail, sendAccountCreatedNotification, sendPasswordResetEmail } from "./emailService.js";
 import { config } from "../config/env.js";
 
-// In-Memory store for when MONGODB_URI is placeholder "##########"
 const inMemoryStore = {
   doctors: new Map(),
   otps: new Map(),
@@ -14,6 +13,7 @@ const inMemoryStore = {
 
 export const register = async ({
   fullName,
+  mobileNumber,
   email,
   password,
   fullQualification,
@@ -21,7 +21,6 @@ export const register = async ({
 }) => {
   const normalizedEmail = email.toLowerCase().trim();
 
-  // 1. Check if email is blocked due to 5 OTP failures
   if (config.isPlaceholder(config.mongodbUri)) {
     const existingOtp = inMemoryStore.otps.get(normalizedEmail);
     if (existingOtp && existingOtp.isBlocked && existingOtp.blockedUntil > new Date()) {
@@ -58,28 +57,26 @@ export const register = async ({
     }
   }
 
-  // 2. Generate secure 6-digit OTP
-  const rawOtp = crypto.randomInt(100000, 999999).toString();
+  const rawOtp = crypto.randomInt(100000, 1000000).toString();
   const hashedOtp = await hashOtp(rawOtp);
   const hashedPassword = await hashPassword(password);
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
   const pendingData = {
     fullName: fullName.trim(),
+    mobileNumber: mobileNumber.trim(),
     passwordHash: hashedPassword,
     fullQualification: fullQualification.trim(),
     doctorRegistrationNumber: doctorRegistrationNumber.trim(),
   };
 
-  // 3. Save OTP record
   if (config.isPlaceholder(config.mongodbUri)) {
-    const prev = inMemoryStore.otps.get(normalizedEmail);
     inMemoryStore.otps.set(normalizedEmail, {
       email: normalizedEmail,
       otp: rawOtp,
       hashedOtp,
       type: "registration",
-      failedAttempts: prev ? prev.failedAttempts : 0,
+      failedAttempts: 0,
       isBlocked: false,
       blockedUntil: null,
       registrationData: pendingData,
@@ -92,14 +89,14 @@ export const register = async ({
         otpHash: hashedOtp,
         registrationData: pendingData,
         expiresAt,
-        // preserve failedAttempts if not blocked yet
-        $setOnInsert: { failedAttempts: 0, isBlocked: false, blockedUntil: null },
+        failedAttempts: 0,
+        isBlocked: false,
+        blockedUntil: null,
       },
       { upsert: true, new: true }
     );
   }
 
-  // 4. Send professional OTP email
   await sendOtpEmail({
     to: normalizedEmail,
     doctorName: fullName,
@@ -134,7 +131,6 @@ export const verifyEmail = async ({ email, otp }) => {
     };
   }
 
-  // Check if currently blocked
   const isBlocked = config.isPlaceholder(config.mongodbUri)
     ? otpRecord.isBlocked && otpRecord.blockedUntil > new Date()
     : isOtpBlockedNow(otpRecord);
@@ -146,7 +142,6 @@ export const verifyEmail = async ({ email, otp }) => {
     };
   }
 
-  // Check expiration
   if (new Date() > new Date(otpRecord.expiresAt)) {
     throw {
       statusCode: 400,
@@ -154,7 +149,6 @@ export const verifyEmail = async ({ email, otp }) => {
     };
   }
 
-  // Verify OTP
   const isValid = config.isPlaceholder(config.mongodbUri)
     ? otpRecord.otp === otp || (await compareOtp(otp, otpRecord.hashedOtp))
     : await compareOtp(otp, otpRecord.otpHash);
@@ -190,7 +184,6 @@ export const verifyEmail = async ({ email, otp }) => {
     };
   }
 
-  // OTP verified! Create the Doctor account
   const { registrationData } = otpRecord;
   let createdDoctor = null;
 
@@ -199,6 +192,7 @@ export const verifyEmail = async ({ email, otp }) => {
       _id: "doc_" + Date.now(),
       id: "doc_" + Date.now(),
       fullName: registrationData.fullName,
+      mobileNumber: registrationData.mobileNumber,
       email: normalizedEmail,
       fullQualification: registrationData.fullQualification,
       doctorRegistrationNumber: registrationData.doctorRegistrationNumber,
@@ -213,24 +207,30 @@ export const verifyEmail = async ({ email, otp }) => {
   } else {
     createdDoctor = await Doctor.create({
       fullName: registrationData.fullName,
+      mobileNumber: registrationData.mobileNumber,
       email: normalizedEmail,
       passwordHash: registrationData.passwordHash,
       fullQualification: registrationData.fullQualification,
       doctorRegistrationNumber: registrationData.doctorRegistrationNumber,
       emailVerified: true,
     });
-    // Remove OTP record upon successful registration
+
     await OtpVerification.deleteOne({ _id: otpRecord._id });
   }
 
-  // Send professional account created notification email
-  await sendAccountCreatedNotification({
-    to: normalizedEmail,
-    doctorName: createdDoctor.fullName,
-    registrationNo: createdDoctor.doctorRegistrationNumber,
-  });
+  try {
+    const result = await sendAccountCreatedNotification({
+      to: normalizedEmail,
+      doctorName: createdDoctor.fullName,
+      registrationNo: createdDoctor.doctorRegistrationNumber,
+    });
+    if (!result.success) {
+      console.error(`[Email Service]: Account notification failed for ${normalizedEmail}`);
+    }
+  } catch (error) {
+    console.error(`[Email Service]: Account notification failed for ${normalizedEmail}: ${error.message}`);
+  }
 
-  // Issue authentication token
   const token = signToken({
     id: createdDoctor._id.toString(),
     email: createdDoctor.email,
@@ -244,6 +244,7 @@ export const verifyEmail = async ({ email, otp }) => {
       id: createdDoctor._id.toString(),
       fullName: createdDoctor.fullName,
       email: createdDoctor.email,
+      mobileNumber: createdDoctor.mobileNumber,
       fullQualification: createdDoctor.fullQualification,
       doctorRegistrationNumber: createdDoctor.doctorRegistrationNumber,
     },
@@ -268,7 +269,6 @@ export const login = async ({ email, password }) => {
     };
   }
 
-  // Check account lockout due to 5 wrong attempts
   const isLocked = doctor.lockUntil && new Date(doctor.lockUntil) > new Date();
   if (isLocked) {
     const waitMins = Math.ceil((new Date(doctor.lockUntil) - new Date()) / (60 * 1000));
@@ -283,7 +283,7 @@ export const login = async ({ email, password }) => {
   if (!isPasswordMatch) {
     const newFailCount = (doctor.failedLoginAttempts || 0) + 1;
     const shouldLock = newFailCount >= 5;
-    const lockTime = shouldLock ? new Date(Date.now() + 30 * 60 * 1000) : null; // 30 min lockout
+    const lockTime = shouldLock ? new Date(Date.now() + 30 * 60 * 1000) : null;
 
     doctor.failedLoginAttempts = shouldLock ? 0 : newFailCount;
     doctor.lockUntil = lockTime;
@@ -308,7 +308,6 @@ export const login = async ({ email, password }) => {
     };
   }
 
-  // Password correct: reset failed attempts
   doctor.failedLoginAttempts = 0;
   doctor.lockUntil = null;
   if (config.isPlaceholder(config.mongodbUri)) {
@@ -330,6 +329,7 @@ export const login = async ({ email, password }) => {
       id: doctor._id.toString(),
       fullName: doctor.fullName,
       email: doctor.email,
+      mobileNumber: doctor.mobileNumber,
       fullQualification: doctor.fullQualification,
       doctorRegistrationNumber: doctor.doctorRegistrationNumber,
     },
@@ -348,7 +348,7 @@ export const forgotPassword = async ({ email }) => {
   }
 
   if (doctor) {
-    const rawOtp = crypto.randomInt(100000, 999999).toString();
+    const rawOtp = crypto.randomInt(100000, 1000000).toString();
     const hashedOtp = await hashOtp(rawOtp);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -358,12 +358,21 @@ export const forgotPassword = async ({ email }) => {
         otp: rawOtp,
         hashedOtp,
         type: "password_reset",
+        failedAttempts: 0,
+        isBlocked: false,
+        blockedUntil: null,
         expiresAt,
       });
     } else {
       await OtpVerification.findOneAndUpdate(
         { email: normalizedEmail, type: "password_reset" },
-        { otpHash: hashedOtp, expiresAt },
+        {
+          otpHash: hashedOtp,
+          expiresAt,
+          failedAttempts: 0,
+          isBlocked: false,
+          blockedUntil: null,
+        },
         { upsert: true, new: true }
       );
     }
@@ -376,7 +385,6 @@ export const forgotPassword = async ({ email }) => {
     });
   }
 
-  // Generic safe message to prevent email enumeration
   return {
     message: "If an account exists with that email address, password reset instructions have been sent.",
   };
@@ -402,14 +410,35 @@ export const resetPassword = async ({ email, otp, newPassword }) => {
     };
   }
 
+  if (isOtpBlockedNow(otpRecord)) {
+    throw {
+      statusCode: 403,
+      message: "This reset code is blocked due to too many failed attempts. Request a new code.",
+    };
+  }
+
   const isValid = config.isPlaceholder(config.mongodbUri)
     ? otpRecord.otp === otp || (await compareOtp(otp, otpRecord.hashedOtp))
     : await compareOtp(otp, otpRecord.otpHash);
 
   if (!isValid) {
+    otpRecord.failedAttempts = (otpRecord.failedAttempts || 0) + 1;
+    otpRecord.isBlocked = otpRecord.failedAttempts >= 5;
+    otpRecord.blockedUntil = otpRecord.isBlocked
+      ? new Date(Date.now() + 24 * 60 * 60 * 1000)
+      : null;
+
+    if (config.isPlaceholder(config.mongodbUri)) {
+      inMemoryStore.otps.set(`reset_${normalizedEmail}`, otpRecord);
+    } else {
+      await otpRecord.save();
+    }
+
     throw {
-      statusCode: 400,
-      message: "Invalid reset code.",
+      statusCode: otpRecord.isBlocked ? 403 : 400,
+      message: otpRecord.isBlocked
+        ? "Too many incorrect reset codes. Request a new code after 24 hours."
+        : "Invalid reset code.",
     };
   }
 
@@ -445,6 +474,7 @@ export const getMe = async (doctorId) => {
           id: doc._id.toString(),
           fullName: doc.fullName,
           email: doc.email,
+          mobileNumber: doc.mobileNumber,
           fullQualification: doc.fullQualification,
           doctorRegistrationNumber: doc.doctorRegistrationNumber,
         };
@@ -460,6 +490,7 @@ export const getMe = async (doctorId) => {
     id: doctor._id.toString(),
     fullName: doctor.fullName,
     email: doctor.email,
+    mobileNumber: doctor.mobileNumber,
     fullQualification: doctor.fullQualification,
     doctorRegistrationNumber: doctor.doctorRegistrationNumber,
   };

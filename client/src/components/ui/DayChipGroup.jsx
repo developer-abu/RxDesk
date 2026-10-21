@@ -1,11 +1,4 @@
-/**
- * DayChipGroup.jsx
- *
- * Implements Design Spec §6.4:
- * - 64 × 40 px chips, 6px radius, 8px gap
- * - Selected: fill #E6F0F4, border #0F5A78, text #0F5A78, 14px check icon
- * - Built as accessible checkboxes
- */
+
 
 import React, { useId } from "react";
 import { Check, AlertCircle } from "lucide-react";
@@ -22,7 +15,7 @@ const DAYS = [
 
 const DayChipGroup = ({
   label = "Visiting days",
-  selectedDays = [], // ["Mon", "Wed", "Fri"]
+  selectedDays = [],
   onChange,
   required = false,
   error,

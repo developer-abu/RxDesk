@@ -1,17 +1,8 @@
-/**
- * PublicHeader.jsx
- *
- * Implements Design Spec §6.6 and §7.1:
- * - 60px sticky top header on Landing & Legal pages
- * - Logo monogram lockup: 28×28px #0F5A78 with white "Rx", wordmark 18/24 600 #14232B
- * - Nav links: Features, How it works
- * - Actions: Log in (secondary small), Register (primary small)
- * - If user already signed in: single "Go to Dashboard" primary small button
- */
+
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import Button from "../ui/Button";
 
 const PublicHeader = () => {
@@ -20,7 +11,7 @@ const PublicHeader = () => {
   return (
     <header className="sticky top-0 z-40 w-full h-[60px] bg-white border-b border-[#D5DDE3]">
       <div className="max-w-[1200px] h-full mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between">
-        {/* Left: Logo & Nav */}
+
         <div className="flex items-center">
           <Link
             to="/"
@@ -34,7 +25,6 @@ const PublicHeader = () => {
             </span>
           </Link>
 
-          {/* Desktop Anchor Navigation */}
           <nav className="hidden md:flex items-center ml-12 gap-2" aria-label="Main Navigation">
             <a
               href="#features"
@@ -51,7 +41,6 @@ const PublicHeader = () => {
           </nav>
         </div>
 
-        {/* Right: Actions */}
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
             <Link to="/dashboard">
@@ -80,4 +69,3 @@ const PublicHeader = () => {
 };
 
 export default PublicHeader;
-

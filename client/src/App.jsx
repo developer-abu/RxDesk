@@ -1,8 +1,4 @@
-/**
- * App.jsx
- *
- * Application root with arrow functions.
- */
+
 
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
@@ -13,7 +9,6 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicOnlyRoute from "./components/auth/PublicOnlyRoute";
 import Spinner from "./components/ui/Spinner";
 
-/* ---- Lazy-load pages (code splitting for faster initial load) ---- */
 const HomePage               = lazy(() => import("./pages/HomePage"));
 const RegisterPage           = lazy(() => import("./pages/RegisterPage"));
 const LoginPage              = lazy(() => import("./pages/LoginPage"));
@@ -48,7 +43,6 @@ const PageTitle = () => {
   );
 };
 
-/* ---- Full-page suspense fallback ---- */
 const PageLoader = () => (
   <div
     className="fixed inset-0 flex items-center justify-center"
@@ -65,19 +59,18 @@ const App = () => (
     <PageTitle />
     <ToastProvider>
       <AuthProvider>
-        {/* Accessibility: skip to main content — first focusable element */}
+
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
 
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            {/* ---- Public routes ---- */}
+
             <Route path="/" element={<HomePage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
 
-            {/* ---- Public-only routes (redirect to /dashboard if signed in) ---- */}
             <Route element={<PublicOnlyRoute />}>
               <Route path="/register"        element={<RegisterPage />} />
               <Route path="/login"           element={<LoginPage />} />
@@ -85,14 +78,12 @@ const App = () => (
               <Route path="/reset-password"  element={<ResetPasswordPage />} />
             </Route>
 
-            {/* ---- Protected routes (redirect to /login if not signed in) ---- */}
-            {/* <Route element={<ProtectedRoute />}> */}
+            <Route element={<ProtectedRoute />}>
               <Route path="/dashboard"          element={<DashboardPage />} />
               <Route path="/chambers/new"       element={<CreateChamberPage />} />
               <Route path="/prescriptions/new"  element={<CreatePrescriptionPage />} />
-            {/* </Route> */}
+            </Route>
 
-            {/* ---- 404 fallback ---- */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

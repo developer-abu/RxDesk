@@ -1,12 +1,3 @@
-/**
- * ForgotPasswordPage.jsx
- *
- * Implements Design Spec §9 (Utility screen: Forgot password):
- * - 480px card
- * - Email field + Send Reset Link button
- * - Safe response: info banner identical whether or not account exists
- */
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import AuthHeader from "../components/layout/AuthHeader";
@@ -28,7 +19,7 @@ const ForgotPasswordPage = () => {
     try {
       await authService.forgotPassword({ email: email.trim().toLowerCase() });
     } catch {
-      // Intentionally suppress error to avoid user enumeration
+      console.error("Password reset request could not be confirmed.");
     } finally {
       setIsLoading(false);
       setSubmitted(true);

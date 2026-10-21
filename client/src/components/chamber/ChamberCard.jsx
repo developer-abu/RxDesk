@@ -1,12 +1,4 @@
-/**
- * ChamberCard.jsx
- *
- * Implements Design Spec §6.5 & §10.2:
- * - 20px padding, min height 232px
- * - Title, Doctor, Reg. No., Address, Contact, Visits
- * - 88px label column (13/20 #5F6F7A), value column (14/22)
- * - Footer link: "Create prescription →"
- */
+
 
 import React from "react";
 import { Link } from "react-router-dom";
@@ -27,12 +19,15 @@ const ChamberCard = ({ chamber }) => {
     visitingSessions,
   } = chamber;
 
-  const visitingString = formatVisitingLine(visitingDays, visitingSessions);
+  const visitingString = formatVisitingLine(
+    visitingDays,
+    visitingSessions || chamber.visitingHours
+  );
 
   return (
     <div className="w-full min-h-[232px] p-5 rounded-[8px] bg-white border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] flex flex-col justify-between transition-colors duration-120">
       <div>
-        {/* Title */}
+
         <h3
           title={chamberName}
           className="text-[16px] leading-[24px] font-semibold text-[#14232B] truncate mb-3"
@@ -40,9 +35,8 @@ const ChamberCard = ({ chamber }) => {
           {chamberName}
         </h3>
 
-        {/* Detail rows */}
         <div className="space-y-3">
-          {/* Doctor */}
+
           <div className="flex text-[13px] leading-[20px]">
             <span className="w-[88px] shrink-0 text-[#5F6F7A]">Doctor</span>
             <span className="text-[14px] leading-[22px] text-[#14232B] line-clamp-2">
@@ -51,7 +45,6 @@ const ChamberCard = ({ chamber }) => {
             </span>
           </div>
 
-          {/* Reg No */}
           {registrationNo && (
             <div className="flex text-[13px] leading-[20px]">
               <span className="w-[88px] shrink-0 text-[#5F6F7A]">Reg. No.</span>
@@ -61,7 +54,6 @@ const ChamberCard = ({ chamber }) => {
             </div>
           )}
 
-          {/* Address */}
           <div className="flex text-[13px] leading-[20px]">
             <span className="w-[88px] shrink-0 text-[#5F6F7A]">Address</span>
             <span
@@ -72,7 +64,6 @@ const ChamberCard = ({ chamber }) => {
             </span>
           </div>
 
-          {/* Contact */}
           <div className="flex text-[13px] leading-[20px]">
             <span className="w-[88px] shrink-0 text-[#5F6F7A]">Contact</span>
             <span className="text-[14px] leading-[22px] text-[#14232B]">
@@ -80,7 +71,6 @@ const ChamberCard = ({ chamber }) => {
             </span>
           </div>
 
-          {/* Visits */}
           {visitingString && (
             <div className="flex text-[13px] leading-[20px]">
               <span className="w-[88px] shrink-0 text-[#5F6F7A]">Visits</span>
@@ -92,7 +82,6 @@ const ChamberCard = ({ chamber }) => {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="mt-4 pt-3 border-t border-[#D5DDE3] flex items-center justify-between">
         <Link
           to={`/prescriptions/new?chamberId=${_id}`}
@@ -109,4 +98,3 @@ const ChamberCard = ({ chamber }) => {
 };
 
 export default ChamberCard;
-

@@ -1,8 +1,4 @@
-/**
- * AuthHeader.jsx
- *
- * Implements Design Spec §6.6 with arrow function.
- */
+
 
 import React from "react";
 import { Link } from "react-router-dom";

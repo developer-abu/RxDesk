@@ -1,11 +1,4 @@
-/**
- * ConfirmDialog.jsx
- *
- * Implements Design Spec §6.5:
- * - 440px fixed width (100% minus 32px on small screens)
- * - 24px padding, 8px radius, modal shadow
- * - Focus trapped, Escape key closes, initial focus on safe button
- */
+
 
 import React, { useEffect, useRef } from "react";
 import Button from "./Button";
@@ -18,7 +11,7 @@ const ConfirmDialog = ({
   cancelLabel = "Cancel",
   onConfirm,
   onCancel,
-  variant = "destructive", // "destructive" | "primary"
+  variant = "destructive",
   isLoading = false,
 }) => {
   const cancelBtnRef = useRef(null);
@@ -27,7 +20,6 @@ const ConfirmDialog = ({
   useEffect(() => {
     if (!isOpen) return;
 
-    // Focus safe cancel button on open
     setTimeout(() => {
       cancelBtnRef.current?.focus();
     }, 50);
@@ -53,14 +45,13 @@ const ConfirmDialog = ({
       aria-describedby="dialog-body"
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
-      {/* Overlay */}
+
       <div
         className="fixed inset-0 bg-[#14232B]/50 transition-opacity duration-120"
         onClick={onCancel}
         aria-hidden="true"
       />
 
-      {/* Modal Dialog */}
       <div
         ref={dialogRef}
         className="relative z-10 w-full max-w-[440px] bg-white rounded-[8px] p-6

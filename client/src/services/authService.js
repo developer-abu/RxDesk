@@ -1,8 +1,4 @@
-/**
- * authService.js
- *
- * All authentication API calls with arrow functions.
- */
+
 
 import apiClient from "../api/apiClient";
 

@@ -1,13 +1,6 @@
-/**
- * ToastContext.jsx
- *
- * Centralized Toast notification system with arrow functions.
- */
-
-import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import { ToastContext } from "./ToastContextDefinition";
 import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
-
-const ToastContext = createContext(null);
 
 const ToastItem = ({ toast, onRemove }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -148,12 +141,4 @@ export const ToastProvider = ({ children }) => {
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>
   );
-};
-
-export const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within ToastProvider");
-  }
-  return context;
 };

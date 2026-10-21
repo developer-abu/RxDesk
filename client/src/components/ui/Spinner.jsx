@@ -1,8 +1,4 @@
-/**
- * Spinner.jsx
- *
- * Accessible loading spinner with arrow function.
- */
+
 
 import React from "react";
 

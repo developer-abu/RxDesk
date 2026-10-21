@@ -1,8 +1,4 @@
-/**
- * TextInput.jsx
- *
- * Implements Design Spec §6.2.
- */
+
 
 import React, { useId } from "react";
 import { AlertCircle } from "lucide-react";

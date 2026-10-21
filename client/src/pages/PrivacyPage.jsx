@@ -1,10 +1,4 @@
-/**
- * PrivacyPage.jsx
- *
- * Implements Design Spec §9 (Utility screen: Privacy Policy):
- * - PublicHeader + container max 720px + Footer
- * - Clearly documents zero patient data storage policy
- */
+
 
 import React from "react";
 import PublicHeader from "../components/layout/PublicHeader";

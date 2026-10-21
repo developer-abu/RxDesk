@@ -1,8 +1,4 @@
-/**
- * SelectInput.jsx
- *
- * Implements Design Spec §6.2 (Native select with custom chevron).
- */
+
 
 import React, { useId } from "react";
 import { ChevronDown, AlertCircle } from "lucide-react";
@@ -13,7 +9,7 @@ const SelectInput = ({
   value,
   onChange,
   onBlur,
-  options = [], // [{ label, value }] or strings
+  options = [],
   placeholder,
   required = false,
   optional = false,

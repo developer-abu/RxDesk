@@ -1,18 +1,9 @@
-/**
- * AppHeader.jsx
- *
- * Implements Design Spec §6.6 and §10.1:
- * - 60px non-sticky header for signed-in pages (Dashboard, Create Chamber, Create Prescription)
- * - Navigation links with 2px bottom line active indicator
- * - Doctor name truncated at 200px with tooltip
- * - Log out button (secondary small)
- * - Mobile responsive collapsible menu panel below 768px
- */
+
 
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { useToast } from "../../context/ToastContext";
+import { useAuth } from "../../hooks/useAuth";
+import { useToast } from "../../hooks/useToast";
 import Button from "../ui/Button";
 import { Menu, X } from "lucide-react";
 
@@ -47,7 +38,7 @@ const AppHeader = () => {
   return (
     <header className="relative w-full h-[60px] bg-white border-b border-[#D5DDE3] z-30">
       <div className="max-w-[1440px] h-full mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between">
-        {/* Left: Logo & Desktop Navigation */}
+
         <div className="flex items-center h-full">
           <Link
             to="/dashboard"
@@ -61,7 +52,6 @@ const AppHeader = () => {
             </span>
           </Link>
 
-          {/* Desktop Nav Items */}
           <nav className="hidden md:flex items-center h-full gap-2" aria-label="App Navigation">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
@@ -86,7 +76,6 @@ const AppHeader = () => {
           </nav>
         </div>
 
-        {/* Right: Doctor Info + Logout (Desktop) */}
         <div className="hidden md:flex items-center">
           <span
             title={doctorDisplayName}
@@ -102,7 +91,6 @@ const AppHeader = () => {
           </Button>
         </div>
 
-        {/* Mobile Menu Button (<768px) */}
         <div className="flex md:hidden items-center">
           <Button
             variant="secondary"
@@ -121,7 +109,6 @@ const AppHeader = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Panel (<768px) */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-[60px] left-0 right-0 bg-white border-b border-[#D5DDE3] shadow-[0_4px_12px_rgba(20,35,43,0.12)] flex flex-col z-40">
           <div className="px-4 py-3 bg-[#F4F6F8] border-b border-[#D5DDE3] text-[14px] font-medium text-[#14232B] truncate">
@@ -164,4 +151,3 @@ const AppHeader = () => {
 };
 
 export default AppHeader;
-

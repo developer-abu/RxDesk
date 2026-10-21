@@ -1,12 +1,8 @@
-/**
- * ProtectedRoute.jsx
- *
- * Guards routes that require authentication with arrow functions.
- */
+
 
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import Spinner from "../ui/Spinner";
 
 const ProtectedRoute = () => {

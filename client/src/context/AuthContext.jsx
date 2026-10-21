@@ -1,19 +1,10 @@
-/**
- * AuthContext.jsx
- *
- * Global authentication state for RxDesk with arrow functions.
- */
-
 import React, {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useState,
 } from "react";
+import { AuthContext } from "./AuthContextDefinition";
 import * as authService from "../services/authService";
-
-const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [doctor, setDoctor] = useState(null);
@@ -40,6 +31,12 @@ export const AuthProvider = ({ children }) => {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    const clearSession = () => setDoctor(false);
+    window.addEventListener("rxdesk:unauthorized", clearSession);
+    return () => window.removeEventListener("rxdesk:unauthorized", clearSession);
   }, []);
 
   const login = useCallback(async (credentials) => {
@@ -84,12 +81,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used inside <AuthProvider>");
-  }
-  return context;
 };

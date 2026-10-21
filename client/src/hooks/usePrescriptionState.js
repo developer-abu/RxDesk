@@ -1,23 +1,9 @@
-/**
- * usePrescriptionState.js
- *
- * ALL temporary prescription data lives here — in React state only.
- *
- * Privacy guarantee enforced by this hook:
- *  - Data is NEVER written to localStorage, sessionStorage, IndexedDB,
- *    URL params, or sent to any API endpoint.
- *  - Refreshing or closing the tab clears everything — by design.
- *  - The interceptor in apiClient.js blocks any accidental transmission.
- *
- * This hook is the single source of truth for the prescription form.
- * The preview component reads from it; the print function reads from it.
- */
+
 
 import { useCallback, useState } from "react";
 
-/* ---- Default / empty prescription state ---- */
 const createEmptyMedicine = (id) => ({
-  id,               // local key only — never sent to server
+  id,
   name: "",
   formulation: "",
   dose: "",
@@ -28,37 +14,29 @@ const createEmptyMedicine = (id) => ({
 });
 
 const getInitialState = () => ({
-  /* Chamber selection — only the ID is stored; details fetched from cached chamber list */
+
   selectedChamberId: "",
 
-  /* Patient information */
   patientName: "",
   age: "",
-  ageUnit: "Years",       // "Years" | "Months" | "Days"
-  sex: "",                // "Male" | "Female" | "Other"
-  consultationDate: new Date().toISOString().split("T")[0], // today YYYY-MM-DD
+  ageUnit: "Years",
+  sex: "",
+  consultationDate: new Date().toISOString().split("T")[0],
 
-  /* Clinical information */
   chiefComplaints: "",
   clinicalNotes: "",
   diagnosis: "",
   investigations: "",
 
-  /* Medicines — array of medicine entry objects */
   medicines: [createEmptyMedicine(1)],
-  _nextMedicineId: 2,     // internal counter for stable keys
+  _nextMedicineId: 2,
 
-  /* Advice and follow-up */
   advice: "",
   followUp: "",
 });
 
-/* ---------------------------------------------------------------- */
-
 export const usePrescriptionState = () => {
   const [state, setState] = useState(getInitialState);
-
-  /* ------ Field updaters ------ */
 
   const setField = useCallback((field, value) => {
     setState((prev) => ({ ...prev, [field]: value }));
@@ -68,11 +46,9 @@ export const usePrescriptionState = () => {
     setState((prev) => ({ ...prev, selectedChamberId: id }));
   }, []);
 
-  /* ------ Medicine entry management ------ */
-
   const addMedicine = useCallback(() => {
     setState((prev) => {
-      if (prev.medicines.length >= 20) return prev; // cap per spec
+      if (prev.medicines.length >= 20) return prev;
       const newEntry = createEmptyMedicine(prev._nextMedicineId);
       return {
         ...prev,
@@ -93,7 +69,7 @@ export const usePrescriptionState = () => {
 
   const removeMedicine = useCallback((id) => {
     setState((prev) => {
-      if (prev.medicines.length <= 1) return prev; // keep at least one entry
+      if (prev.medicines.length <= 1) return prev;
       return {
         ...prev,
         medicines: prev.medicines.filter((m) => m.id !== id),
@@ -102,7 +78,7 @@ export const usePrescriptionState = () => {
   }, []);
 
   const restoreMedicine = useCallback((medicine, index) => {
-    // Undo: re-insert the removed entry at its original position
+
     setState((prev) => {
       const newMedicines = [...prev.medicines];
       newMedicines.splice(index, 0, medicine);
@@ -110,20 +86,12 @@ export const usePrescriptionState = () => {
     });
   }, []);
 
-  /* ------ Clear form ------ */
-
   const clearForm = useCallback(() => {
     setState(getInitialState());
   }, []);
 
-  /* ------ Derived helpers ------ */
-
-  /**
-   * Returns true if the form has content beyond default values.
-   * Used by the leave guard and Clear Form button enabled state.
-   */
   const hasContent = useCallback(() => {
-    const s = state; // captured snapshot — not reactive inside callback
+    const s = state;
     return (
       s.patientName.trim() !== "" ||
       s.age.trim() !== "" ||
@@ -146,11 +114,6 @@ export const usePrescriptionState = () => {
     );
   }, [state]);
 
-  /**
-   * Validate before printing.
-   * Returns an array of error messages; empty array = valid.
-   * Spec §12.8: required to print = chamber + patient name + age + sex + date + ≥1 named medicine
-   */
   const validate = useCallback(() => {
     const errors = [];
     if (!state.selectedChamberId) errors.push("chamber");

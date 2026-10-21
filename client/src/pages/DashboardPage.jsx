@@ -1,13 +1,4 @@
-/**
- * DashboardPage.jsx
- *
- * Implements Design Spec §10 (Doctor Dashboard):
- * - Welcome block with doctor greeting
- * - Two action tiles with dynamic emphasis swap when 0 chambers
- * - Saved chambers grid with count badge
- * - Loading skeleton & empty state
- * - Zero patient/revenue statistics per strict spec requirement
- */
+
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -16,9 +7,14 @@ import ChamberCard from "../components/chamber/ChamberCard";
 import EmptyState from "../components/ui/EmptyState";
 import Skeleton from "../components/ui/Skeleton";
 import NoticeBanner from "../components/ui/NoticeBanner";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import * as chamberService from "../services/chamberService";
 import { ArrowRight } from "lucide-react";
+
+const getChamberList = async () => {
+  const response = await chamberService.getChambers();
+  return response?.data?.chambers || response?.chambers || [];
+};
 
 const DashboardPage = () => {
   const { doctor } = useAuth();
@@ -30,9 +26,7 @@ const DashboardPage = () => {
     setIsLoading(true);
     setLoadError(false);
     try {
-      const res = await chamberService.getChambers();
-      const list = res?.data?.chambers || res?.chambers || [];
-      setChambers(list);
+      setChambers(await getChamberList());
     } catch {
       setLoadError(true);
     } finally {
@@ -41,7 +35,20 @@ const DashboardPage = () => {
   };
 
   useEffect(() => {
-    fetchChambers();
+    let active = true;
+    getChamberList()
+      .then((list) => {
+        if (active) setChambers(list);
+      })
+      .catch(() => {
+        if (active) setLoadError(true);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const doctorGreeting = doctor?.fullName
@@ -56,7 +63,7 @@ const DashboardPage = () => {
 
       <main id="main-content" className="flex-1 py-8 px-4 md:px-6 lg:px-8">
         <div className="max-w-[1200px] mx-auto">
-          {/* Welcome Block */}
+
           <div className="mb-6">
             <h1 className="text-[24px] leading-[32px] font-semibold text-[#14232B]">
               {doctorGreeting}
@@ -66,9 +73,8 @@ const DashboardPage = () => {
             </p>
           </div>
 
-          {/* Action Tiles (Two columns, 24px gap, fixed 112px height) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            {/* Tile: Create Prescription */}
+
             <Link
               to={hasChambers ? "/prescriptions/new" : "#"}
               className={`min-h-[112px] p-6 rounded-[8px] flex items-center justify-between transition-colors duration-120 group
@@ -104,7 +110,6 @@ const DashboardPage = () => {
               />
             </Link>
 
-            {/* Tile: Create Chamber */}
             <Link
               to="/chambers/new"
               className={`min-h-[112px] p-6 rounded-[8px] flex items-center justify-between transition-colors duration-120 group
@@ -139,7 +144,6 @@ const DashboardPage = () => {
             </Link>
           </div>
 
-          {/* Your Chambers Header with Count Badge */}
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-[18px] leading-[26px] font-semibold text-[#14232B]">
               Your Chambers
@@ -153,7 +157,6 @@ const DashboardPage = () => {
             )}
           </div>
 
-          {/* Chamber Content Area */}
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Skeleton height="232px" className="rounded-[8px]" />

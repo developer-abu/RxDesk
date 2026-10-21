@@ -32,6 +32,7 @@ const otpVerificationSchema = new mongoose.Schema(
     },
     registrationData: {
       fullName: { type: String },
+      mobileNumber: { type: String },
       passwordHash: { type: String },
       fullQualification: { type: String },
       doctorRegistrationNumber: { type: String },
@@ -46,12 +47,12 @@ const otpVerificationSchema = new mongoose.Schema(
   }
 );
 
-// Arrow helper to check if email is currently blocked due to OTP failures
 export const isOtpBlockedNow = (record) => {
   if (!record) return false;
-  if (record.isBlocked) return true;
-  if (record.blockedUntil && new Date(record.blockedUntil) > new Date()) return true;
-  return false;
+  return Boolean(
+    record.isBlocked &&
+      (!record.blockedUntil || new Date(record.blockedUntil) > new Date())
+  );
 };
 
 export const OtpVerification = mongoose.model("OtpVerification", otpVerificationSchema);

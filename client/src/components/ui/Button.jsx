@@ -1,10 +1,4 @@
-/**
- * Button.jsx
- *
- * Sourced directly from UI/UX Design Spec §6.1 with arrow functions.
- * Variants: primary | secondary | destructive | text-link | icon-only
- * Sizes: standard (44px) | small (36px) | large (48px)
- */
+
 
 import React from "react";
 import Spinner from "./Spinner";

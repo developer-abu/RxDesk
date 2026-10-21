@@ -5,11 +5,7 @@ import {
   getPasswordResetEmailTemplate,
 } from "../utils/emailTemplates.js";
 
-/**
- * Sends email via Google Apps Script Web App or logs to console if placeholder/development
- */
 const sendGoogleScriptEmail = async ({ to, subject, htmlBody, textBody }) => {
-  // If Google Script URL is placeholder (##########) or missing, log simulation
   if (config.isPlaceholder(config.googleScriptEmailUrl)) {
     console.log(
       "\n=======================================================\n" +
@@ -37,38 +33,38 @@ const sendGoogleScriptEmail = async ({ to, subject, htmlBody, textBody }) => {
     });
 
     if (!response.ok) {
-      console.error(`[Email Service]: Google Script returned HTTP ${response.status}`);
-      return { success: false, error: `Google Script status: ${response.status}` };
+      const error = new Error(`Email provider returned HTTP ${response.status}.`);
+      error.statusCode = 502;
+      throw error;
     }
 
     return { success: true };
   } catch (error) {
-    console.error(`[Email Service Error]: Failed to send via Google Script: ${error.message}`);
-    return { success: false, error: error.message };
+    if (!error.statusCode) error.statusCode = 502;
+    throw error;
   }
 };
 
 export const sendOtpEmail = async ({ to, doctorName, otp, expiresInMinutes = 10 }) => {
   const htmlBody = getOtpEmailTemplate({ doctorName, otp, expiresInMinutes });
-  const textBody = `Hello ${doctorName || "Doctor"},\n\nYour RxDesk verification code is: ${otp}\nThis code is valid for ${expiresInMinutes} minutes.\n\nRxDesk Team`;
-  const subject = `Your RxDesk Verification Code: ${otp}`;
+  const textBody = `Hello ${doctorName || "Doctor"},\n\nThanks for creating an RxDesk account. Enter this one-time code in the registration screen to verify your email and complete account setup:\n\n${otp}\n\nThis code expires in ${expiresInMinutes} minutes. Never share it with anyone. If you did not start this registration, ignore this email.\n\nRxDesk`;
+  const subject = "Verify your email address for RxDesk";
 
-  return await sendGoogleScriptEmail({ to, subject, htmlBody, textBody });
+  return sendGoogleScriptEmail({ to, subject, htmlBody, textBody });
 };
 
 export const sendAccountCreatedNotification = async ({ to, doctorName, registrationNo }) => {
   const htmlBody = getAccountCreatedEmailTemplate({ doctorName, email: to, registrationNo });
-  const textBody = `Welcome to RxDesk, ${doctorName || "Doctor"}!\n\nYour practitioner account has been successfully created and verified.\nYou can now log in to manage your chambers and create prescriptions.\n\nRxDesk Team`;
-  const subject = "Welcome to RxDesk — Your Account is Ready";
+  const textBody = `Hello ${doctorName || "Doctor"},\n\nYour email has been verified and your RxDesk doctor account is active. You can now set up your chambers and prepare prescriptions.\n\nGet started:\n- Add your chamber details and visiting hours.\n- Choose a chamber when preparing a prescription.\n- Review, print, and sign your prescription.\n\nPatient and prescription details are kept in your browser and are not stored on RxDesk servers.\n\nRxDesk`;
+  const subject = "Your RxDesk account is ready";
 
-  return await sendGoogleScriptEmail({ to, subject, htmlBody, textBody });
+  return sendGoogleScriptEmail({ to, subject, htmlBody, textBody });
 };
 
 export const sendPasswordResetEmail = async ({ to, doctorName, otp, expiresInMinutes = 10 }) => {
   const htmlBody = getPasswordResetEmailTemplate({ doctorName, otp, expiresInMinutes });
-  const textBody = `Hello ${doctorName || "Doctor"},\n\nYour RxDesk password reset code is: ${otp}\nThis code expires in ${expiresInMinutes} minutes.\n\nRxDesk Team`;
-  const subject = `RxDesk Password Reset Code: ${otp}`;
+  const textBody = `Hello ${doctorName || "Doctor"},\n\nWe received a request to reset the password for your RxDesk account. Enter this one-time code to continue:\n\n${otp}\n\nThis code expires in ${expiresInMinutes} minutes and can only be used once. Do not share it with anyone. If you did not request a password reset, ignore this email; your password will remain unchanged.\n\nRxDesk`;
+  const subject = "Your RxDesk password reset code";
 
-  return await sendGoogleScriptEmail({ to, subject, htmlBody, textBody });
+  return sendGoogleScriptEmail({ to, subject, htmlBody, textBody });
 };
-

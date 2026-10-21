@@ -1,19 +1,5 @@
-/**
- * CreatePrescriptionPage.jsx
- *
- * Implements Design Spec §12 & §13 (Create Prescription):
- * - Strict temporary data policy: everything kept in React memory only
- * - 2-column workspace on desktop with sticky A4 preview
- * - Edit / Preview tab mode below 1024px
- * - Sticky 56px action bar with Clear Form & Print Prescription
- * - Chamber selection, Patient info, Clinical notes, Repeatable medicines with Undo toast, Advice
- * - Two-layer leave guard (browser beforeunload + React Router blocker)
- * - Clear form confirmation modal
- * - Pixel-perfect native browser printing + jsPDF export fallback
- */
-
-import React, { useState, useEffect, useRef } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import React, { useCallback, useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import AppHeader from "../components/layout/AppHeader";
 import ChamberDropdown from "../components/chamber/ChamberDropdown";
 import MedicineEntry from "../components/prescription/MedicineEntry";
@@ -27,17 +13,20 @@ import NoticeBanner from "../components/ui/NoticeBanner";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import { usePrescriptionState } from "../hooks/usePrescriptionState";
 import { useLeaveGuard } from "../hooks/useLeaveGuard";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../hooks/useToast";
 import * as chamberService from "../services/chamberService";
 import { generatePrescriptionPDF } from "../utils/pdfExport";
 import { Printer, Lock, Plus, Download } from "lucide-react";
 
+const fetchChambers = async () => {
+  const response = await chamberService.getChambers();
+  return response?.data?.chambers || response?.chambers || [];
+};
+
 const CreatePrescriptionPage = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { addToast } = useToast();
 
-  // Temporary Prescription State (100% in React memory)
   const {
     state,
     setField,
@@ -51,36 +40,27 @@ const CreatePrescriptionPage = () => {
     validate,
   } = usePrescriptionState();
 
-  // Chambers list & loading
   const [chambers, setChambers] = useState([]);
   const [isLoadingChambers, setIsLoadingChambers] = useState(true);
   const [chamberLoadError, setChamberLoadError] = useState(false);
 
-  // Responsive tab mode for screens < 1024px: "edit" | "preview"
   const [activeTab, setActiveTab] = useState("edit");
 
-  // Dialogs & banners
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [leaveProceedCallback, setLeaveProceedCallback] = useState(null);
   const [validationErrors, setValidationErrors] = useState([]);
   const [hasPrintedOnce, setHasPrintedOnce] = useState(false);
 
-  // Form container ref for error scrolling
   const formRef = useRef(null);
 
-  // Load chambers on mount
   const loadChambers = async () => {
     setIsLoadingChambers(true);
     setChamberLoadError(false);
     try {
-      const res = await chamberService.getChambers();
-      const list = res?.data?.chambers || res?.chambers || [];
+      const list = await fetchChambers();
       setChambers(list);
 
-      // Preselection rule per §12.3:
-      // 1. URL param chamberId
-      // 2. If exactly one chamber exists, preselect it
       const urlChamberId = searchParams.get("chamberId");
       if (urlChamberId && list.some((c) => c._id === urlChamberId)) {
         setSelectedChamberId(urlChamberId);
@@ -95,19 +75,39 @@ const CreatePrescriptionPage = () => {
   };
 
   useEffect(() => {
-    loadChambers();
-  }, []);
+    let active = true;
+    const urlChamberId = searchParams.get("chamberId");
 
-  // Leave guard hook: warns if form has content
-  useLeaveGuard(hasContent(), (proceed, reset) => {
+    fetchChambers()
+      .then((list) => {
+        if (!active) return;
+        setChambers(list);
+        if (urlChamberId && list.some((chamber) => chamber._id === urlChamberId)) {
+          setSelectedChamberId(urlChamberId);
+        } else if (list.length === 1) {
+          setSelectedChamberId(list[0]._id);
+        }
+      })
+      .catch(() => {
+        if (active) setChamberLoadError(true);
+      })
+      .finally(() => {
+        if (active) setIsLoadingChambers(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [searchParams, setSelectedChamberId]);
+
+  const handleLeaveBlocked = useCallback((proceed) => {
     setLeaveProceedCallback(() => proceed);
     setShowLeaveDialog(true);
-  });
+  }, []);
+  useLeaveGuard(hasContent(), handleLeaveBlocked);
 
-  // Selected chamber object
   const selectedChamber = chambers.find((c) => c._id === state.selectedChamberId);
 
-  // Handle Medicine Removal with Undo Toast (8 seconds duration)
   const handleRemoveMedicine = (id, idx) => {
     const medToRemove = state.medicines.find((m) => m.id === id);
     removeMedicine(id);
@@ -123,13 +123,12 @@ const CreatePrescriptionPage = () => {
     });
   };
 
-  // Handle Print Action
   const handlePrint = () => {
     const errors = validate();
     setValidationErrors(errors);
 
     if (errors.length > 0) {
-      // Scroll to form top to show error banner
+
       formRef.current?.scrollIntoView({ behavior: "smooth" });
       return;
     }
@@ -144,11 +143,9 @@ const CreatePrescriptionPage = () => {
       setHasPrintedOnce(true);
     }
 
-    // Trigger native browser print
     window.print();
   };
 
-  // Handle Save as PDF fallback
   const handleSaveAsPDF = () => {
     const errors = validate();
     setValidationErrors(errors);
@@ -167,7 +164,7 @@ const CreatePrescriptionPage = () => {
         type: "success",
         message: "Prescription PDF downloaded successfully.",
       });
-    } catch (err) {
+    } catch {
       addToast({
         type: "error",
         message: "Could not generate PDF. Please use Print Prescription instead.",
@@ -175,11 +172,10 @@ const CreatePrescriptionPage = () => {
     }
   };
 
-  // Handle Confirm Clear Form
   const handleConfirmClear = () => {
     const currentChamberId = state.selectedChamberId;
     clearForm();
-    // Keep selected chamber selected per §12.9
+
     setSelectedChamberId(currentChamberId);
     setShowClearDialog(false);
     setValidationErrors([]);
@@ -193,9 +189,6 @@ const CreatePrescriptionPage = () => {
     <div className="min-h-screen bg-[#F4F6F8] flex flex-col">
       <AppHeader />
 
-      {/* ============================================================
-          STICKY ACTION BAR (56px high, sticks at top of viewport)
-          ============================================================ */}
       <div className="action-bar sticky top-0 z-30 w-full h-[56px] md:h-[56px] bg-white border-b border-[#D5DDE3]">
         <div className="max-w-[1440px] h-full mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between">
           <h1 className="text-[20px] md:text-[24px] leading-[32px] font-semibold text-[#14232B] truncate">
@@ -223,9 +216,6 @@ const CreatePrescriptionPage = () => {
         </div>
       </div>
 
-      {/* ============================================================
-          RESPONSIVE TABS (< 1024px ONLY)
-          ============================================================ */}
       <div className="lg:hidden sticky top-[56px] z-20 bg-white border-b border-[#D5DDE3] px-4 py-2">
         <SegmentedControl
           options={[
@@ -237,21 +227,16 @@ const CreatePrescriptionPage = () => {
         />
       </div>
 
-      {/* ============================================================
-          MAIN WORKSPACE (2-Column Grid on Desktop)
-          ============================================================ */}
       <main id="main-content" className="flex-1 py-6 px-4 md:px-6 lg:px-8">
         <div className="max-w-[1440px] mx-auto flex flex-col lg:flex-row gap-6 items-start relative">
-          {/* ============================================================
-              LEFT: FORM COLUMN (560px >=1440, 520px at 1280, 460px at 1024)
-              ============================================================ */}
+
           <div
             ref={formRef}
             className={`w-full lg:w-[460px] desktop:w-[520px] wide:w-[560px] shrink-0 space-y-6 ${
               activeTab === "preview" ? "hidden lg:block" : "block"
             }`}
           >
-            {/* 1. Permanent Temporary-Data Notice */}
+
             <div className="temp-data-notice">
               <NoticeBanner type="info">
                 <strong>This prescription is temporary.</strong> Nothing on this
@@ -260,14 +245,12 @@ const CreatePrescriptionPage = () => {
               </NoticeBanner>
             </div>
 
-            {/* Validation Error Banner */}
             {validationErrors.length > 0 && (
               <NoticeBanner type="error">
                 Complete the highlighted required fields before printing.
               </NoticeBanner>
             )}
 
-            {/* 2. Chamber Selection Card */}
             <div className="bg-white rounded-[8px] border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] p-6">
               <ChamberDropdown
                 chambers={chambers}
@@ -284,14 +267,13 @@ const CreatePrescriptionPage = () => {
               />
             </div>
 
-            {/* 3. Patient Information Card */}
             <div className="bg-white rounded-[8px] border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] p-6">
               <h2 className="text-[18px] leading-[26px] font-semibold text-[#14232B] mb-5">
                 Patient Information
               </h2>
 
               <div className="space-y-4">
-                {/* Row 1: Patient Name */}
+
                 <TextInput
                   label="Patient name"
                   placeholder="Full name"
@@ -306,9 +288,8 @@ const CreatePrescriptionPage = () => {
                   maxLength={80}
                 />
 
-                {/* Row 2: Age + Sex */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Joined Age Control */}
+
                   <div>
                     <label className="text-[14px] leading-[20px] font-medium text-[#14232B] flex items-center mb-1.5">
                       Age <span className="text-[#B42318] ml-1">*</span>
@@ -348,7 +329,6 @@ const CreatePrescriptionPage = () => {
                     )}
                   </div>
 
-                  {/* Sex Segmented Control */}
                   <SegmentedControl
                     label="Sex"
                     options={["Male", "Female", "Other"]}
@@ -363,7 +343,6 @@ const CreatePrescriptionPage = () => {
                   />
                 </div>
 
-                {/* Row 3: Consultation Date */}
                 <div className="w-full md:w-1/2">
                   <TextInput
                     label="Consultation date"
@@ -382,7 +361,6 @@ const CreatePrescriptionPage = () => {
               </div>
             </div>
 
-            {/* 4. Clinical Information Card */}
             <div className="bg-white rounded-[8px] border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] p-6">
               <h2 className="text-[18px] leading-[26px] font-semibold text-[#14232B] mb-5">
                 Clinical Information
@@ -431,7 +409,6 @@ const CreatePrescriptionPage = () => {
               </div>
             </div>
 
-            {/* 5. Medicines Card */}
             <div className="bg-white rounded-[8px] border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] p-6">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
@@ -466,7 +443,6 @@ const CreatePrescriptionPage = () => {
                 </div>
               )}
 
-              {/* Medicine Entries List */}
               <div className="space-y-4">
                 {state.medicines.map((med, idx) => (
                   <MedicineEntry
@@ -485,7 +461,6 @@ const CreatePrescriptionPage = () => {
                 ))}
               </div>
 
-              {/* Bottom Dashed Add Button */}
               <button
                 type="button"
                 onClick={addMedicine}
@@ -504,7 +479,6 @@ const CreatePrescriptionPage = () => {
               )}
             </div>
 
-            {/* 6. Advice and Follow-up Card */}
             <div className="bg-white rounded-[8px] border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] p-6">
               <h2 className="text-[18px] leading-[26px] font-semibold text-[#14232B] mb-5">
                 Advice and Follow-up
@@ -533,7 +507,6 @@ const CreatePrescriptionPage = () => {
               </div>
             </div>
 
-            {/* Secondary Save as PDF Action */}
             <div className="pt-2 flex justify-end">
               <Button
                 variant="secondary"
@@ -546,9 +519,6 @@ const CreatePrescriptionPage = () => {
             </div>
           </div>
 
-          {/* ============================================================
-              RIGHT: PREVIEW COLUMN (Sticky, Fluid width)
-              ============================================================ */}
           <div
             className={`w-full lg:flex-1 lg:sticky lg:top-[80px] lg:h-[calc(100vh-104px)] ${
               activeTab === "edit" ? "hidden lg:block" : "block"
@@ -562,7 +532,6 @@ const CreatePrescriptionPage = () => {
         </div>
       </main>
 
-      {/* Clear Confirmation Modal */}
       <ConfirmDialog
         isOpen={showClearDialog}
         title="Clear this prescription?"
@@ -574,7 +543,6 @@ const CreatePrescriptionPage = () => {
         onConfirm={handleConfirmClear}
       />
 
-      {/* Leave Page Confirmation Modal */}
       <ConfirmDialog
         isOpen={showLeaveDialog}
         title="Leave this page?"

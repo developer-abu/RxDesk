@@ -1,8 +1,4 @@
-/**
- * chamberService.js
- *
- * All chamber API calls with arrow functions.
- */
+
 
 import apiClient from "../api/apiClient";
 

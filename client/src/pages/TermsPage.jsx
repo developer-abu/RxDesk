@@ -1,10 +1,4 @@
-/**
- * TermsPage.jsx
- *
- * Implements Design Spec §9 (Utility screen: Terms of Use):
- * - PublicHeader + container max 720px + Footer
- * - Explicitly establishes medical practitioner responsibility
- */
+
 
 import React from "react";
 import PublicHeader from "../components/layout/PublicHeader";

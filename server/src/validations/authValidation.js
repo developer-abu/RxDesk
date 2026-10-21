@@ -13,6 +13,10 @@ export const registerSchema = z.object({
     .trim()
     .toLowerCase()
     .email("Enter a valid email address"),
+  mobileNumber: z
+    .string({ required_error: "Mobile number is required" })
+    .trim()
+    .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
   password: z
     .string({ required_error: "Password is required" })
     .min(8, "Password must be at least 8 characters")
@@ -81,4 +85,3 @@ export const resetPasswordSchema = z.object({
       "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, and one number"
     ),
 });
-

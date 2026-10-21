@@ -5,7 +5,7 @@ import { config } from "../config/env.js";
 
 export const authenticate = async (req, res, next) => {
   try {
-    // Read JWT from HTTP-only cookie first, fallback to Authorization header
+
     let token = req.cookies?.rxdesk_token;
 
     if (!token && req.headers.authorization?.startsWith("Bearer ")) {
@@ -21,7 +21,6 @@ export const authenticate = async (req, res, next) => {
       return errorResponse(res, 401, "Session expired or invalid. Please log in again.");
     }
 
-    // In database placeholder mode, allow authenticated session passing through mock context
     if (config.isPlaceholder(config.mongodbUri)) {
       req.doctor = {
         _id: decoded.id,

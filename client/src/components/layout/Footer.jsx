@@ -1,11 +1,4 @@
-/**
- * Footer.jsx
- *
- * Implements Design Spec §7.5:
- * - 3-column layout (ratio 2 : 1 : 1)
- * - Single column below 768px
- * - Legal & Contact links
- */
+
 
 import React from "react";
 import { Link } from "react-router-dom";
@@ -14,9 +7,9 @@ const Footer = () => {
   return (
     <footer className="w-full bg-[#F4F6F8] border-t border-[#D5DDE3] pt-12 pb-6">
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-8">
-        {/* Columns */}
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
-          {/* Column 1: Brand & Disclaimer (span 2 cols) */}
+
           <div className="md:col-span-2">
             <Link to="/" className="inline-flex items-center gap-2.5 mb-3">
               <div className="w-7 h-7 rounded-[6px] bg-[#0F5A78] flex items-center justify-center text-white text-[13px] font-bold select-none">
@@ -32,7 +25,6 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Column 2: Legal */}
           <div>
             <h4 className="text-[14px] leading-[20px] font-semibold text-[#14232B] mb-3">
               Legal
@@ -57,7 +49,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Column 3: Contact */}
           <div>
             <h4 className="text-[14px] leading-[20px] font-semibold text-[#14232B] mb-3">
               Contact
@@ -69,7 +60,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Line */}
         <div className="mt-8 pt-4 border-t border-[#D5DDE3] flex items-center justify-between text-[13px] leading-[20px] text-[#5F6F7A]">
           <span>© 2026 RxDesk. All rights reserved.</span>
           <span>Version 1.0</span>

@@ -1,8 +1,4 @@
-/**
- * PasswordInput.jsx
- *
- * Implements Design Spec §6.2 (Password field with Show/Hide toggle and optional rules checklist).
- */
+
 
 import React, { useState } from "react";
 import TextInput from "./TextInput";
@@ -24,7 +20,6 @@ const PasswordInput = ({
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
-  // Validation rules
   const hasMinLength = value.length >= 8;
   const hasUpperAndLower = /[A-Z]/.test(value) && /[a-z]/.test(value);
   const hasNumber = /[0-9]/.test(value);
@@ -67,7 +62,7 @@ const PasswordInput = ({
         onBlur={onBlur}
         error={error}
         helperText={helperText}
-        required={false} // Handled in custom label above
+        required={false}
         label=""
         inputClassName="pr-[64px]"
         rightElement={rightToggle}

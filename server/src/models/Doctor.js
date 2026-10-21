@@ -16,6 +16,12 @@ const doctorSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+    mobileNumber: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: [15, "Mobile number cannot exceed 15 characters"],
+    },
     passwordHash: {
       type: String,
       required: [true, "Password hash is required"],
@@ -50,7 +56,6 @@ const doctorSchema = new mongoose.Schema(
   }
 );
 
-// Arrow helper to verify if doctor account is locked due to failed attempts
 export const isDoctorLocked = (doctor) => {
   return !!(doctor && doctor.lockUntil && new Date(doctor.lockUntil) > new Date());
 };

@@ -1,12 +1,4 @@
-/**
- * NoticeBanner.jsx
- *
- * Implements Design Spec §6.5:
- * - Padding 12px 16px, 6px radius, state background and border
- * - 20px icon, 14/22 text in #14232B
- * - Types: info, success, warning, error
- * - Accessibility: role="alert" for error/success; static for info
- */
+
 
 import React from "react";
 import { Info, CheckCircle2, AlertTriangle, AlertCircle, X } from "lucide-react";

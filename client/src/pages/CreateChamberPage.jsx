@@ -1,13 +1,4 @@
-/**
- * CreateChamberPage.jsx
- *
- * Implements Design Spec §11 (Create Chamber):
- * - Max 880px centered form
- * - 3 stacked cards: Chamber Info, Doctor Info (prefilled), Visiting Schedule (Day chips + 1-2 sessions)
- * - Discard confirmation dialog on Cancel
- * - Inline Success card replacing the form upon successful creation
- * - "Add Another Chamber" prefill continuity
- */
+
 
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -20,11 +11,10 @@ import Button from "../components/ui/Button";
 import NoticeBanner from "../components/ui/NoticeBanner";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import ChamberCard from "../components/chamber/ChamberCard";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import * as chamberService from "../services/chamberService";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 
-// 15-minute time slots from 5:00 AM to 11:45 PM
 const TIME_SLOTS = [];
 for (let hour = 5; hour <= 23; hour++) {
   for (let min of [0, 15, 30, 45]) {
@@ -39,11 +29,9 @@ const CreateChamberPage = () => {
   const navigate = useNavigate();
   const { doctor } = useAuth();
 
-  // Prefill source tracking
   const [isPrefilledFromChamber, setIsPrefilledFromChamber] = useState(false);
   const [createdChamber, setCreatedChamber] = useState(null);
 
-  // Form State
   const [formData, setFormData] = useState({
     chamberName: "",
     address: "",
@@ -61,7 +49,6 @@ const CreateChamberPage = () => {
   const [saveError, setSaveError] = useState("");
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
 
-  // On mount: Fetch most recent chamber to prefill doctor details
   useEffect(() => {
     const loadPrefill = async () => {
       try {
@@ -86,7 +73,7 @@ const CreateChamberPage = () => {
           }));
         }
       } catch {
-        // Fallback to doctor name from auth context
+
         if (doctor?.fullName) {
           setFormData((prev) => ({
             ...prev,
@@ -160,7 +147,6 @@ const CreateChamberPage = () => {
     return Object.values(nextErrors).filter(Boolean);
   };
 
-  // Visiting Session Handlers
   const addSession = () => {
     if (formData.visitingSessions.length >= 2) return;
     setFormData((prev) => ({
@@ -188,7 +174,6 @@ const CreateChamberPage = () => {
     }));
   };
 
-  // Check if form is dirty for Cancel confirmation
   const isDirty =
     Boolean(formData.chamberName) ||
     Boolean(formData.address) ||
@@ -203,7 +188,6 @@ const CreateChamberPage = () => {
     }
   };
 
-  // Save Chamber
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaveError("");
@@ -242,7 +226,6 @@ const CreateChamberPage = () => {
     }
   };
 
-  // Add Another Chamber handler
   const handleAddAnother = () => {
     setCreatedChamber(null);
     setSaveError("");
@@ -267,7 +250,7 @@ const CreateChamberPage = () => {
 
       <main id="main-content" className="flex-1 py-8 px-4 md:px-6 lg:px-8">
         <div className="max-w-[880px] mx-auto">
-          {/* Back link */}
+
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-1.5 text-[14px] leading-[20px] font-medium text-[#0F5A78] hover:text-[#0B475F] mb-4 focus:outline-none"
@@ -276,9 +259,6 @@ const CreateChamberPage = () => {
             <span>Dashboard</span>
           </Link>
 
-          {/* ============================================================
-              INLINE SUCCESS CARD (Replaces form upon success per §11.3)
-              ============================================================ */}
           {createdChamber ? (
             <div className="bg-white rounded-[8px] border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] p-6 md:p-8 space-y-6">
               <NoticeBanner type="success">
@@ -314,11 +294,9 @@ const CreateChamberPage = () => {
               </div>
             </div>
           ) : (
-            /* ============================================================
-               CHAMBER CREATION FORM
-               ============================================================ */
+
             <>
-              {/* Heading Block */}
+
               <div className="mb-6">
                 <h1 className="text-[24px] leading-[32px] font-semibold text-[#14232B]">
                   Create Chamber
@@ -329,7 +307,6 @@ const CreateChamberPage = () => {
                 </p>
               </div>
 
-              {/* Form-level Error Banner */}
               {saveError && (
                 <div className="mb-6">
                   <NoticeBanner type="error">{saveError}</NoticeBanner>
@@ -337,7 +314,7 @@ const CreateChamberPage = () => {
               )}
 
               <form onSubmit={handleSubmit} noValidate className="space-y-6">
-                {/* ---------------- CARD 1: CHAMBER INFORMATION ---------------- */}
+
                 <div className="bg-white rounded-[8px] border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] p-6">
                   <h2 className="text-[18px] leading-[26px] font-semibold text-[#14232B]">
                     Chamber Information
@@ -347,7 +324,7 @@ const CreateChamberPage = () => {
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
-                    {/* Chamber Name (full width) */}
+
                     <div className="md:col-span-2">
                       <TextInput
                         label="Chamber name"
@@ -362,7 +339,6 @@ const CreateChamberPage = () => {
                       />
                     </div>
 
-                    {/* Chamber Address (full width) */}
                     <div className="md:col-span-2">
                       <TextareaInput
                         label="Chamber address"
@@ -378,7 +354,6 @@ const CreateChamberPage = () => {
                       />
                     </div>
 
-                    {/* Contact Number (half width) */}
                     <div>
                       <TextInput
                         label="Contact number"
@@ -395,7 +370,6 @@ const CreateChamberPage = () => {
                   </div>
                 </div>
 
-                {/* ---------------- CARD 2: DOCTOR INFORMATION ---------------- */}
                 <div className="bg-white rounded-[8px] border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] p-6">
                   <h2 className="text-[18px] leading-[26px] font-semibold text-[#14232B]">
                     Doctor Information
@@ -407,7 +381,7 @@ const CreateChamberPage = () => {
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
-                    {/* Doctor's Name (full width) */}
+
                     <div className="md:col-span-2">
                       <TextInput
                         label="Doctor’s name"
@@ -422,7 +396,6 @@ const CreateChamberPage = () => {
                       />
                     </div>
 
-                    {/* Qualifications (half width) */}
                     <div>
                       <TextInput
                         label="Qualifications"
@@ -437,7 +410,6 @@ const CreateChamberPage = () => {
                       />
                     </div>
 
-                    {/* Registration Number (half width) */}
                     <div>
                       <TextInput
                         label="Medical registration number"
@@ -454,7 +426,6 @@ const CreateChamberPage = () => {
                   </div>
                 </div>
 
-                {/* ---------------- CARD 3: VISITING SCHEDULE ---------------- */}
                 <div className="bg-white rounded-[8px] border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] p-6">
                   <h2 className="text-[18px] leading-[26px] font-semibold text-[#14232B]">
                     Visiting Schedule
@@ -464,7 +435,7 @@ const CreateChamberPage = () => {
                   </p>
 
                   <div className="space-y-6">
-                    {/* Visiting Days Chips */}
+
                     <DayChipGroup
                       label="Visiting days"
                       selectedDays={formData.visitingDays}
@@ -473,7 +444,6 @@ const CreateChamberPage = () => {
                       required
                     />
 
-                    {/* Visiting Hours Rows */}
                     <div>
                       <label className="text-[14px] leading-[20px] font-medium text-[#14232B] flex items-center mb-2">
                         Visiting hours <span className="text-[#B42318] ml-1">*</span>
@@ -528,7 +498,6 @@ const CreateChamberPage = () => {
                   </div>
                 </div>
 
-                {/* Action Row */}
                 <div className="flex flex-col-reverse md:flex-row items-center justify-end gap-3 pt-2">
                   <Button
                     variant="secondary"
@@ -553,7 +522,6 @@ const CreateChamberPage = () => {
             </>
           )}
 
-          {/* Discard Confirmation Dialog */}
           <ConfirmDialog
             isOpen={showDiscardDialog}
             title="Discard this chamber?"

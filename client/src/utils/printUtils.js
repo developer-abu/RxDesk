@@ -1,10 +1,4 @@
-/**
- * printUtils.js
- *
- * Implements Design Spec §13 & §13.7 with arrow functions.
- */
 
-import { formatAgeSex, formatDate, abbreviateRoute, formatVisitingLine } from "./formatUtils";
 
 const PAGE_HEIGHT = 1123;
 const TOP_MARGIN = 45;
@@ -24,13 +18,8 @@ const estimateTextHeight = (text) => {
   return Math.max(24, totalLines * 20);
 };
 
-export const paginatePrescription = (prescriptionState, chamber) => {
+export const paginatePrescription = (prescriptionState) => {
   const {
-    patientName,
-    age,
-    ageUnit,
-    sex,
-    consultationDate,
     chiefComplaints,
     clinicalNotes,
     diagnosis,

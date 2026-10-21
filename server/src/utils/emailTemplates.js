@@ -1,92 +1,76 @@
-/**
- * emailTemplates.js
- *
- * Professional, mobile-responsive HTML email templates for RxDesk:
- * - OTP Verification Email
- * - Welcome & Account Created Notification Email
- * - Password Reset Email
- */
+const escapeHtml = (value) =>
+  String(value ?? "").replace(/[&<>"']/g, (character) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+    return entities[character];
+  });
 
-export const getOtpEmailTemplate = ({ doctorName, otp, expiresInMinutes = 10 }) => {
-  const safeName = doctorName ? (doctorName.startsWith("Dr.") ? doctorName : `Dr. ${doctorName}`) : "Doctor";
+const getGreetingName = (doctorName) => {
+  const name = doctorName?.trim();
+  if (!name) return "Doctor";
+  return escapeHtml(/^dr\.?\s/i.test(name) ? name : `Dr. ${name}`);
+};
 
-  return `
+const renderEmailTemplate = ({ preheader, label, title, greeting, content, notice }) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your RxDesk Verification Code</title>
+  <meta name="color-scheme" content="light">
+  <title>${escapeHtml(title)}</title>
+  <style>
+    @media only screen and (max-width: 620px) {
+      .email-shell { width: 100% !important; }
+      .email-content { padding: 28px 22px !important; }
+      .email-header { padding: 22px !important; }
+      .email-footer { padding: 20px 22px !important; }
+      .otp-code { font-size: 30px !important; letter-spacing: 6px !important; }
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F6F8; color: #14232B;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F4F6F8; padding: 32px 16px;">
+<body style="margin:0;padding:0;background-color:#f2f5f7;font-family:Arial,Helvetica,sans-serif;color:#14232b;">
+  <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
+    ${escapeHtml(preheader)}
+  </div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f2f5f7;padding:36px 12px;">
     <tr>
       <td align="center">
-        <!-- Main Card -->
-        <table role="presentation" width="100%" style="max-width: 560px; background-color: #FFFFFF; border: 1px solid #D5DDE3; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(20, 35, 43, 0.04);">
-          <!-- Header Bar -->
+        <table class="email-shell" role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:600px;background-color:#ffffff;border:1px solid #dce4e8;border-radius:12px;overflow:hidden;">
           <tr>
-            <td style="background-color: #0F5A78; padding: 24px 32px; text-align: left;">
-              <table role="presentation" width="100%">
+            <td class="email-header" style="padding:26px 36px;background-color:#0f5a78;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
                   <td>
-                    <span style="font-size: 22px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.3px;">RxDesk</span>
-                    <span style="display: block; font-size: 12px; color: #E6F0F4; margin-top: 2px;">Doctor Prescription Generator</span>
+                    <div style="font-size:24px;font-weight:700;letter-spacing:-0.5px;color:#ffffff;">RxDesk</div>
+                    <div style="margin-top:4px;font-size:13px;line-height:19px;color:#dcecf2;">A simpler workspace for your practice</div>
                   </td>
-                  <td align="right">
-                    <span style="display: inline-block; padding: 4px 10px; background-color: rgba(255, 255, 255, 0.15); border-radius: 4px; font-size: 11px; font-weight: 600; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.5px;">Verification</span>
+                  <td align="right" valign="middle">
+                    <span style="display:inline-block;padding:7px 10px;border:1px solid #6d9eb1;border-radius:20px;color:#ffffff;font-size:11px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;">${escapeHtml(label)}</span>
                   </td>
                 </tr>
               </table>
             </td>
           </tr>
-
-          <!-- Body Content -->
           <tr>
-            <td style="padding: 32px 32px 24px 32px;">
-              <h1 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 600; color: #14232B; line-height: 28px;">
-                Verify Your Doctor Account
-              </h1>
-              <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 24px; color: #3F4F5A;">
-                Dear <strong>${safeName}</strong>,
-              </p>
-              <p style="margin: 0 0 24px 0; font-size: 14px; line-height: 22px; color: #3F4F5A;">
-                Thank you for registering with <strong>RxDesk</strong>. To verify your email address and activate your practitioner account, please use the One-Time Password (OTP) below:
-              </p>
-
-              <!-- OTP Box -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin: 24px 0;">
-                <tr>
-                  <td align="center" style="background-color: #EEF4F7; border: 1.5px dashed #0F5A78; border-radius: 8px; padding: 20px;">
-                    <span style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #5F6F7A; margin-bottom: 8px;">Your One-Time Password</span>
-                    <span style="display: inline-block; font-family: 'Courier New', Courier, monospace; font-size: 34px; font-weight: 700; letter-spacing: 8px; color: #0F5A78;">${otp}</span>
-                    <span style="display: block; font-size: 12px; color: #5F6F7A; margin-top: 8px;">Valid for <strong>${expiresInMinutes} minutes</strong></span>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Security Caution Note -->
-              <div style="background-color: #FFF4DB; border-left: 4px solid #8A5A00; padding: 12px 16px; border-radius: 4px; margin: 24px 0;">
-                <p style="margin: 0; font-size: 13px; line-height: 20px; color: #8A5A00;">
-                  <strong>Security Note:</strong> Never share this OTP with anyone. RxDesk support will never call or ask you for your verification code.
-                </p>
+            <td class="email-content" style="padding:36px;">
+              <h1 style="margin:0 0 18px;font-size:24px;line-height:32px;font-weight:700;color:#14232b;">${escapeHtml(title)}</h1>
+              <p style="margin:0 0 18px;font-size:15px;line-height:24px;color:#334650;">Hello ${greeting},</p>
+              ${content}
+              <div style="margin-top:24px;padding:14px 16px;border-left:4px solid #d99825;border-radius:4px;background-color:#fff8e9;color:#67480e;font-size:13px;line-height:20px;">
+                ${notice}
               </div>
-
-              <p style="margin: 0; font-size: 13px; line-height: 20px; color: #5F6F7A;">
-                If you did not initiate this request, you can safely disregard this email. Your email will not be registered without completing this verification.
-              </p>
             </td>
           </tr>
-
-          <!-- Footer -->
           <tr>
-            <td style="background-color: #F8FAFB; border-top: 1px solid #D5DDE3; padding: 20px 32px; text-align: center;">
-              <p style="margin: 0 0 6px 0; font-size: 12px; color: #7B8A95;">
-                RxDesk &bull; Professional Prescription Utility for Doctors in India
-              </p>
-              <p style="margin: 0; font-size: 11px; color: #8A98A3;">
-                Zero Patient Data Persistence Policy &bull; Registered Practitioners Only
-              </p>
+            <td class="email-footer" style="padding:22px 36px;border-top:1px solid #e5eaed;background-color:#f8fafb;text-align:center;">
+              <p style="margin:0 0 6px;font-size:12px;line-height:18px;color:#52636d;">RxDesk · Doctor prescription workspace</p>
+              <p style="margin:0;font-size:11px;line-height:17px;color:#7b8a93;">This is an automated message. Please do not reply to this email.</p>
             </td>
           </tr>
         </table>
@@ -96,186 +80,81 @@ export const getOtpEmailTemplate = ({ doctorName, otp, expiresInMinutes = 10 }) 
 </body>
 </html>
 `;
-};
+
+const renderOtpBlock = ({ label, otp, expiresInMinutes }) => `
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;">
+    <tr>
+      <td align="center" style="padding:24px 16px;border:1px solid #c8dce5;border-radius:8px;background-color:#f2f8fa;">
+        <div style="margin-bottom:10px;color:#52636d;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">${escapeHtml(label)}</div>
+        <div class="otp-code" style="font-family:'Courier New',Courier,monospace;font-size:36px;font-weight:700;letter-spacing:8px;color:#0f5a78;">${escapeHtml(otp)}</div>
+        <div style="margin-top:10px;color:#52636d;font-size:13px;line-height:20px;">This code expires in <strong>${escapeHtml(expiresInMinutes)} minutes</strong>.</div>
+      </td>
+    </tr>
+  </table>
+`;
+
+export const getOtpEmailTemplate = ({ doctorName, otp, expiresInMinutes = 10 }) =>
+  renderEmailTemplate({
+    preheader: "Use your RxDesk verification code to confirm your email address.",
+    label: "Email verification",
+    title: "Verify your email address",
+    greeting: getGreetingName(doctorName),
+    content: `
+      <p style="margin:0 0 12px;font-size:14px;line-height:23px;color:#334650;">Thanks for creating an RxDesk account. Enter this one-time code in the registration screen to verify your email and complete account setup.</p>
+      ${renderOtpBlock({ label: "Your verification code", otp, expiresInMinutes })}
+      <p style="margin:0;font-size:13px;line-height:21px;color:#52636d;">For your security, never share this code with anyone. RxDesk support will never ask you to provide it.</p>
+    `,
+    notice: "If you did not start this registration, you can ignore this message. Your account will not be activated without email verification.",
+  });
 
 export const getAccountCreatedEmailTemplate = ({ doctorName, email, registrationNo }) => {
-  const safeName = doctorName ? (doctorName.startsWith("Dr.") ? doctorName : `Dr. ${doctorName}`) : "Doctor";
+  const registrationRow = registrationNo
+    ? `<tr>
+        <td style="padding:10px 12px;border-top:1px solid #e5eaed;color:#52636d;font-size:13px;">Registration number</td>
+        <td style="padding:10px 12px;border-top:1px solid #e5eaed;color:#14232b;font-size:13px;font-weight:700;">${escapeHtml(registrationNo)}</td>
+      </tr>`
+    : "";
 
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to RxDesk - Account Created</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F6F8; color: #14232B;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F4F6F8; padding: 32px 16px;">
-    <tr>
-      <td align="center">
-        <!-- Main Card -->
-        <table role="presentation" width="100%" style="max-width: 560px; background-color: #FFFFFF; border: 1px solid #D5DDE3; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(20, 35, 43, 0.04);">
-          <!-- Header Bar -->
-          <tr>
-            <td style="background-color: #0F5A78; padding: 24px 32px; text-align: left;">
-              <table role="presentation" width="100%">
-                <tr>
-                  <td>
-                    <span style="font-size: 22px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.3px;">RxDesk</span>
-                    <span style="display: block; font-size: 12px; color: #E6F0F4; margin-top: 2px;">Doctor Prescription Generator</span>
-                  </td>
-                  <td align="right">
-                    <span style="display: inline-block; padding: 4px 10px; background-color: #1E7B4F; border-radius: 4px; font-size: 11px; font-weight: 600; color: #FFFFFF; text-transform: uppercase; letter-spacing: 0.5px;">Active</span>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Body Content -->
-          <tr>
-            <td style="padding: 32px 32px 24px 32px;">
-              <div style="display: inline-block; width: 44px; height: 44px; line-height: 44px; text-align: center; border-radius: 50%; background-color: #E7F4EC; color: #1E7B4F; font-size: 22px; margin-bottom: 16px;">
-                &#10003;
-              </div>
-
-              <h1 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 600; color: #14232B; line-height: 28px;">
-                Welcome to RxDesk, ${safeName}!
-              </h1>
-
-              <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 22px; color: #3F4F5A;">
-                Your doctor account has been successfully verified and created. You can now configure your clinic chambers and begin generating clean, standard A4 prescriptions in seconds.
-              </p>
-
-              <!-- Account Summary Box -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F8FAFB; border: 1px solid #D5DDE3; border-radius: 6px; margin: 20px 0; padding: 16px;">
-                <tr>
-                  <td style="padding: 6px 12px; font-size: 13px; color: #5F6F7A; width: 35%;">Doctor Name:</td>
-                  <td style="padding: 6px 12px; font-size: 13px; font-weight: 600; color: #14232B;">${safeName}</td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 12px; font-size: 13px; color: #5F6F7A;">Account Email:</td>
-                  <td style="padding: 6px 12px; font-size: 13px; font-weight: 600; color: #14232B;">${email}</td>
-                </tr>
-                ${registrationNo ? `
-                <tr>
-                  <td style="padding: 6px 12px; font-size: 13px; color: #5F6F7A;">Registration No:</td>
-                  <td style="padding: 6px 12px; font-size: 13px; font-weight: 600; color: #14232B;">${registrationNo}</td>
-                </tr>
-                ` : ''}
-              </table>
-
-              <!-- Getting Started Steps -->
-              <h2 style="margin: 24px 0 12px 0; font-size: 15px; font-weight: 600; color: #14232B;">
-                Getting Started with RxDesk:
-              </h2>
-              <ol style="margin: 0 0 24px 0; padding-left: 20px; font-size: 14px; line-height: 24px; color: #3F4F5A;">
-                <li><strong>Add your Chamber(s):</strong> Save clinic name, full address, visiting hours, and phone once.</li>
-                <li><strong>Create Prescriptions:</strong> Select your chamber from the dropdown; chamber and doctor details auto-fill instantly.</li>
-                <li><strong>Print &amp; Hand-Sign:</strong> Print directly to standard A4 sheets, then apply your physical stamp and signature.</li>
-              </ol>
-
-              <!-- Zero Storage Guarantee Highlight -->
-              <div style="background-color: #EAF3F8; border-left: 4px solid #0F5A78; padding: 14px 16px; border-radius: 4px; margin: 20px 0;">
-                <p style="margin: 0; font-size: 13px; line-height: 20px; color: #0F5A78;">
-                  <strong>Privacy Guarantee:</strong> Patient names, clinical notes, and medicine entries are kept exclusively in browser memory while you format and print. RxDesk never stores patient data on any server.
-                </p>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="background-color: #F8FAFB; border-top: 1px solid #D5DDE3; padding: 20px 32px; text-align: center;">
-              <p style="margin: 0 0 6px 0; font-size: 12px; color: #7B8A95;">
-                RxDesk &bull; Professional Prescription Utility for Doctors in India
-              </p>
-              <p style="margin: 0; font-size: 11px; color: #8A98A3;">
-                This notification was sent to confirm the registration of ${email}.
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-`;
+  return renderEmailTemplate({
+    preheader: "Your RxDesk account is verified and ready to use.",
+    label: "Account confirmed",
+    title: "Your account is ready",
+    greeting: getGreetingName(doctorName),
+    content: `
+      <p style="margin:0 0 20px;font-size:14px;line-height:23px;color:#334650;">Your email has been verified and your RxDesk doctor account is active. You can now set up your chambers and prepare prescriptions.</p>
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:20px 0;border:1px solid #e0e7eb;border-radius:8px;background-color:#f8fafb;">
+        <tr>
+          <td style="padding:10px 12px;color:#52636d;font-size:13px;">Account name</td>
+          <td style="padding:10px 12px;color:#14232b;font-size:13px;font-weight:700;">${getGreetingName(doctorName)}</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 12px;border-top:1px solid #e5eaed;color:#52636d;font-size:13px;">Account email</td>
+          <td style="padding:10px 12px;border-top:1px solid #e5eaed;color:#14232b;font-size:13px;font-weight:700;">${escapeHtml(email)}</td>
+        </tr>
+        ${registrationRow}
+      </table>
+      <h2 style="margin:24px 0 10px;font-size:16px;line-height:23px;color:#14232b;">Get started</h2>
+      <ol style="margin:0;padding-left:22px;color:#334650;font-size:14px;line-height:24px;">
+        <li>Add your chamber details and visiting hours.</li>
+        <li>Choose a chamber when preparing a prescription.</li>
+        <li>Review, print, and sign your prescription.</li>
+      </ol>
+      <p style="margin:20px 0 0;padding:14px 16px;border-radius:6px;background-color:#eef6f9;color:#315767;font-size:13px;line-height:21px;"><strong>Privacy:</strong> Patient and prescription details are kept in your browser and are not stored on RxDesk servers.</p>
+    `,
+    notice: "If you did not create this account, please contact RxDesk support so we can help secure it.",
+  });
 };
 
-export const getPasswordResetEmailTemplate = ({ doctorName, otp, expiresInMinutes = 10 }) => {
-  const safeName = doctorName ? (doctorName.startsWith("Dr.") ? doctorName : `Dr. ${doctorName}`) : "Doctor";
-
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reset Your RxDesk Password</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F4F6F8; color: #14232B;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #F4F6F8; padding: 32px 16px;">
-    <tr>
-      <td align="center">
-        <!-- Main Card -->
-        <table role="presentation" width="100%" style="max-width: 560px; background-color: #FFFFFF; border: 1px solid #D5DDE3; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(20, 35, 43, 0.04);">
-          <!-- Header Bar -->
-          <tr>
-            <td style="background-color: #0F5A78; padding: 24px 32px; text-align: left;">
-              <span style="font-size: 22px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.3px;">RxDesk</span>
-              <span style="display: block; font-size: 12px; color: #E6F0F4; margin-top: 2px;">Password Recovery</span>
-            </td>
-          </tr>
-
-          <!-- Body Content -->
-          <tr>
-            <td style="padding: 32px 32px 24px 32px;">
-              <h1 style="margin: 0 0 16px 0; font-size: 20px; font-weight: 600; color: #14232B; line-height: 28px;">
-                Password Reset Request
-              </h1>
-              <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 24px; color: #3F4F5A;">
-                Dear <strong>${safeName}</strong>,
-              </p>
-              <p style="margin: 0 0 20px 0; font-size: 14px; line-height: 22px; color: #3F4F5A;">
-                We received a request to reset your password for your RxDesk doctor account. Use the verification code below to authorize the password change:
-              </p>
-
-              <!-- OTP Box -->
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin: 24px 0;">
-                <tr>
-                  <td align="center" style="background-color: #EEF4F7; border: 1.5px dashed #0F5A78; border-radius: 8px; padding: 20px;">
-                    <span style="display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #5F6F7A; margin-bottom: 8px;">Password Reset Code</span>
-                    <span style="display: inline-block; font-family: 'Courier New', Courier, monospace; font-size: 34px; font-weight: 700; letter-spacing: 8px; color: #0F5A78;">${otp}</span>
-                    <span style="display: block; font-size: 12px; color: #5F6F7A; margin-top: 8px;">Expires in <strong>${expiresInMinutes} minutes</strong></span>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Security Caution Note -->
-              <div style="background-color: #FDECEA; border-left: 4px solid #B42318; padding: 12px 16px; border-radius: 4px; margin: 24px 0;">
-                <p style="margin: 0; font-size: 13px; line-height: 20px; color: #912018;">
-                  <strong>Important:</strong> If you did not request this password reset, please contact support immediately or change your email account password.
-                </p>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="background-color: #F8FAFB; border-top: 1px solid #D5DDE3; padding: 20px 32px; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #7B8A95;">
-                RxDesk &bull; Professional Prescription Utility for Doctors in India
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-`;
-};
-
+export const getPasswordResetEmailTemplate = ({ doctorName, otp, expiresInMinutes = 10 }) =>
+  renderEmailTemplate({
+    preheader: "Use your RxDesk password reset code to continue.",
+    label: "Password reset",
+    title: "Reset your password",
+    greeting: getGreetingName(doctorName),
+    content: `
+      <p style="margin:0 0 12px;font-size:14px;line-height:23px;color:#334650;">We received a request to reset the password for your RxDesk account. Enter the one-time code below to continue.</p>
+      ${renderOtpBlock({ label: "Your password reset code", otp, expiresInMinutes })}
+      <p style="margin:0;font-size:13px;line-height:21px;color:#52636d;">This code can only be used once. Do not share it with anyone.</p>
+    `,
+    notice: "If you did not request a password reset, ignore this email. Your password will remain unchanged.",
+  });

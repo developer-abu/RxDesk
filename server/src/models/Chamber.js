@@ -30,9 +30,24 @@ const chamberSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    visitingSessions: {
+      type: [
+        new mongoose.Schema(
+          {
+            from: { type: String, required: true, trim: true },
+            to: { type: String, required: true, trim: true },
+          },
+          { _id: false }
+        ),
+      ],
+      default: [],
+      validate: {
+        validator: (sessions) => sessions.length <= 2,
+        message: "A maximum of two visiting sessions is allowed",
+      },
+    },
     visitingHours: {
       type: String,
-      required: [true, "Visiting hours are required"],
       trim: true,
       maxlength: [200, "Visiting hours cannot exceed 200 characters"],
     },
@@ -57,8 +72,6 @@ const chamberSchema = new mongoose.Schema(
   }
 );
 
-// Compound index for querying doctor's chambers sorted by creation
 chamberSchema.index({ doctorId: 1, createdAt: -1 });
 
 export const Chamber = mongoose.model("Chamber", chamberSchema);
-

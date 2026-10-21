@@ -1,7 +1,6 @@
 import { Chamber } from "../models/Chamber.js";
 import { config } from "../config/env.js";
 
-// In-Memory store for chambers when MONGODB_URI is placeholder "##########"
 const inMemoryChambers = [];
 
 export const createChamber = async ({ doctorId, chamberData }) => {
@@ -10,7 +9,7 @@ export const createChamber = async ({ doctorId, chamberData }) => {
     address: chamberData.address.trim(),
     contactNumber: chamberData.contactNumber.trim(),
     visitingDays: chamberData.visitingDays || [],
-    visitingHours: chamberData.visitingHours.trim(),
+    visitingSessions: chamberData.visitingSessions || [],
     doctorName: (chamberData.doctorName || "").trim(),
     qualifications: (chamberData.qualifications || "").trim(),
     registrationNo: (chamberData.registrationNo || "").trim(),
@@ -63,11 +62,9 @@ export const getChamberById = async ({ chamberId, doctorId }) => {
     throw { statusCode: 404, message: "Chamber not found" };
   }
 
-  // Strict ownership enforcement: doctor can only read their own chamber
   if (chamber.doctorId.toString() !== doctorId.toString()) {
     throw { statusCode: 403, message: "Access forbidden: you do not own this chamber" };
   }
 
   return chamber;
 };
-

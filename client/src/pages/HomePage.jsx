@@ -1,16 +1,3 @@
-/**
- * HomePage.jsx
- *
- * Implements Design Spec §7 (Landing Page):
- * - Clinical Institutional Minimal theme
- * - Sticky PublicHeader
- * - Hero with decorative abstract A4 sheet mock
- * - Features grid (4 cols desktop, 2 cols tablet, 1 col mobile)
- * - 4-step workflow with connector lines
- * - Permanent patient privacy note banner
- * - Footer with legal and contact links
- */
-
 import React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -18,7 +5,7 @@ import PublicHeader from "../components/layout/PublicHeader";
 import Footer from "../components/layout/Footer";
 import Button from "../components/ui/Button";
 import { Lock, MapPin, FileEdit, FileText, Printer } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 const MotionDiv = motion.div;
 
@@ -132,12 +119,10 @@ const HomePage = () => {
       <PublicHeader />
 
       <main id="main-content" className="flex-1">
-        {/* ============================================================
-            1. HERO SECTION
-            ============================================================ */}
+
         <section className="bg-[#EEF4F7] min-h-[560px] py-14 md:py-20 border-b border-[#D5DDE3]">
           <div className="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-            {/* Text Column (7 cols) */}
+
             <MotionDiv
               initial={shouldAnimate ? { opacity: 0, y: 16 } : false}
               animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
@@ -153,7 +138,6 @@ const HomePage = () => {
                 prescriptions in minutes.
               </p>
 
-              {/* CTA Row */}
               <MotionDiv
                 initial={shouldAnimate ? { opacity: 0, y: 12 } : false}
                 animate={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
@@ -188,7 +172,6 @@ const HomePage = () => {
                 )}
               </MotionDiv>
 
-              {/* Trust Line */}
               <MotionDiv
                 initial={shouldAnimate ? { opacity: 0 } : false}
                 animate={shouldAnimate ? { opacity: 1 } : undefined}
@@ -200,7 +183,6 @@ const HomePage = () => {
               </MotionDiv>
             </MotionDiv>
 
-            {/* Preview Mock Column (5 cols, hidden below 1024px) */}
             <div className="hidden lg:flex lg:col-span-5 justify-center">
               <MotionDiv
                 initial={shouldAnimate ? { opacity: 0, y: 24, rotate: 2 } : false}
@@ -225,7 +207,7 @@ const HomePage = () => {
                     className="h-full flex flex-col justify-between"
                   >
                     <div>
-                      {/* Top Header Bars */}
+
                       <MotionDiv
                         variants={previewItemVariants}
                         className="flex justify-between items-start gap-4"
@@ -240,13 +222,11 @@ const HomePage = () => {
                         </div>
                       </MotionDiv>
 
-                      {/* Heavy Rule */}
                       <MotionDiv
                         variants={previewItemVariants}
                         className="w-full h-[1.5px] bg-[#14232B] my-4"
                       />
 
-                      {/* 3-segment Patient Bar */}
                       <MotionDiv
                         variants={previewItemVariants}
                         className="flex gap-4 pb-2 border-b border-[#D5DDE3]"
@@ -256,7 +236,6 @@ const HomePage = () => {
                         <div className="w-14 h-2 bg-[#E4EAEE] rounded" />
                       </MotionDiv>
 
-                      {/* ℞ Glyph + Content Bars */}
                       <MotionDiv variants={previewItemVariants} className="mt-6">
                         <div className="text-[28px] font-serif font-bold text-[#B7C3CC] leading-none mb-3">
                           ℞
@@ -269,7 +248,6 @@ const HomePage = () => {
                       </MotionDiv>
                     </div>
 
-                    {/* Bottom Signature Line */}
                     <MotionDiv
                       variants={previewItemVariants}
                       className="flex justify-end pt-4"
@@ -285,9 +263,6 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* ============================================================
-            2. FEATURES SECTION
-            ============================================================ */}
         <section id="features" className="py-20 bg-white border-b border-[#D5DDE3] scroll-mt-20">
           <div className="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-8">
             <div>
@@ -299,7 +274,6 @@ const HomePage = () => {
               </p>
             </div>
 
-            {/* Features Grid */}
             <div className="mt-10 grid grid-cols-1 md:grid-cols-2 desktop:grid-cols-4 gap-6">
               {features.map((item, idx) => {
                 const IconComponent = item.icon;
@@ -324,9 +298,6 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* ============================================================
-            3. WORKFLOW SECTION
-            ============================================================ */}
         <section id="how-it-works" className="py-20 bg-[#F4F6F8] border-b border-[#D5DDE3] scroll-mt-20">
           <div className="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-8">
             <MotionDiv
@@ -352,7 +323,7 @@ const HomePage = () => {
                   variants={workflowStepVariants}
                   className="flex flex-col relative"
                 >
-                  {/* Step Circle & Connector */}
+
                   <div className="flex items-center mb-4">
                     <MotionDiv
                       variants={workflowCircleVariants}
@@ -380,9 +351,6 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* ============================================================
-            4. PRIVACY NOTE SECTION
-            ============================================================ */}
         <section className="py-12 bg-white">
           <div className="max-w-[880px] mx-auto px-4 md:px-6 lg:px-8">
             <div className="p-5 rounded-[6px] bg-[#EAF3F8] border border-[#BFD8E6] flex items-start gap-4">

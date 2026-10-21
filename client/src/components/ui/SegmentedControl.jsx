@@ -1,25 +1,18 @@
-/**
- * SegmentedControl.jsx
- *
- * Implements Design Spec §6.4:
- * - Height 44px, equal segments divided by 1px #B7C3CC lines
- * - Selected segment: fill #E6F0F4, text #0F5A78 600, 14px check icon
- * - Accessible as a radio group with keyboard navigation
- */
+
 
 import React, { useId } from "react";
 import { Check, AlertCircle } from "lucide-react";
 
 const SegmentedControl = ({
   label,
-  options = [], // [{ label: "Male", value: "Male" }, ...] or string[]
+  options = [],
   value,
   onChange,
   required = false,
   optional = false,
   error,
   className = "",
-  size = "standard", // "standard" (44px) | "small" (36px)
+  size = "standard",
 }) => {
   const generatedId = useId();
   const labelId = `${generatedId}-label`;

@@ -3,6 +3,9 @@ import { config } from "../config/env.js";
 
 const getSecret = () => {
   if (config.isPlaceholder(config.jwtSecret)) {
+    if (config.nodeEnv === "production") {
+      throw new Error("JWT_SECRET must be configured in production.");
+    }
     return "rxdesk_dev_jwt_secret_change_in_production_key_2026";
   }
   return config.jwtSecret;
@@ -21,4 +24,3 @@ export const verifyToken = (token) => {
     return null;
   }
 };
-

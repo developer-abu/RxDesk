@@ -1,13 +1,4 @@
-/**
- * LoginPage.jsx
- *
- * Implements Design Spec §9 (Doctor Login):
- * - AuthHeader with prompt "New to RxDesk? Register"
- * - 480px card max width
- * - Email + Password with Show/Hide and inline "Forgot password?" link
- * - Safe generic error banner for invalid credentials
- * - Immediate redirect to Dashboard or intended route
- */
+
 
 import React, { useState, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -16,7 +7,7 @@ import TextInput from "../components/ui/TextInput";
 import PasswordInput from "../components/ui/PasswordInput";
 import Button from "../components/ui/Button";
 import NoticeBanner from "../components/ui/NoticeBanner";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -45,7 +36,6 @@ const LoginPage = () => {
         password,
       });
 
-      // Redirect to intended route or /dashboard
       const from = location.state?.from || "/dashboard";
       navigate(from, { replace: true });
     } catch (err) {
@@ -54,10 +44,10 @@ const LoginPage = () => {
           "Too many unsuccessful attempts. Try again in 15 minutes or reset your password."
         );
       } else {
-        // Generic error per security requirement — never reveal whether email or password was wrong
+
         setErrorBanner("Incorrect email or password. Check your details and try again.");
       }
-      setPassword(""); // Clear password field on error per spec
+      setPassword("");
     } finally {
       setIsLoading(false);
     }

@@ -6,7 +6,6 @@ import { createChamberSchema } from "../validations/chamberValidation.js";
 
 const router = Router();
 
-// Enforce authentication on all chamber routes
 router.use(authenticate);
 
 router.post("/", validateRequest(createChamberSchema), chamberController.handleCreateChamber);

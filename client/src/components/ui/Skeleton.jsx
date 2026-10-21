@@ -1,8 +1,4 @@
-/**
- * Skeleton.jsx
- *
- * Implements Design Spec §6.5 with arrow function.
- */
+
 
 import React from "react";
 

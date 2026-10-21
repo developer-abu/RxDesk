@@ -2,7 +2,11 @@ import { Router } from "express";
 import * as authController from "../controllers/authController.js";
 import { validateRequest } from "../middleware/validationMiddleware.js";
 import { authenticate } from "../middleware/authMiddleware.js";
-import { loginRateLimiter, otpRateLimiter } from "../middleware/rateLimitMiddleware.js";
+import {
+  loginRateLimiter,
+  otpRateLimiter,
+  passwordResetRateLimiter,
+} from "../middleware/rateLimitMiddleware.js";
 import {
   registerSchema,
   verifyEmailSchema,
@@ -35,15 +39,16 @@ router.get("/me", authenticate, authController.handleGetMe);
 
 router.post(
   "/forgot-password",
+  passwordResetRateLimiter,
   validateRequest(forgotPasswordSchema),
   authController.handleForgotPassword
 );
 
 router.post(
   "/reset-password",
+  passwordResetRateLimiter,
   validateRequest(resetPasswordSchema),
   authController.handleResetPassword
 );
 
 export default router;
-

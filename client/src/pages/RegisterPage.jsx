@@ -1,15 +1,3 @@
-/**
- * RegisterPage.jsx
- *
- * Implements Design Spec §8 (Doctor Registration):
- * - Fixed 480px max-width card
- * - Validation on blur + live re-validation
- * - Mobile input with fixed +91 prefix cell
- * - Live password rules checklist
- * - Medical practitioner declaration checkbox + disclaimer
- * - OTP verification flow & auto sign-in to Dashboard
- */
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthHeader from "../components/layout/AuthHeader";
@@ -17,8 +5,8 @@ import TextInput from "../components/ui/TextInput";
 import PasswordInput from "../components/ui/PasswordInput";
 import Button from "../components/ui/Button";
 import NoticeBanner from "../components/ui/NoticeBanner";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
+import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../hooks/useToast";
 import { extractLastName } from "../utils/formatUtils";
 
 const RegisterPage = () => {
@@ -26,9 +14,10 @@ const RegisterPage = () => {
   const { registerAndVerify, verifyAndLogin } = useAuth();
   const { addToast } = useToast();
 
-  // Form state
   const [formData, setFormData] = useState({
     fullName: "",
+    fullQualification: "",
+    doctorRegistrationNumber: "",
     email: "",
     mobileNumber: "",
     password: "",
@@ -36,19 +25,16 @@ const RegisterPage = () => {
     agreed: false,
   });
 
-  // Touched state for validation on blur
   const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // OTP Verification state
   const [requiresOtp, setRequiresOtp] = useState(false);
   const [otp, setOtp] = useState("");
   const [otpError, setOtpError] = useState("");
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
-  // Field change
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (touched[field]) {
@@ -56,19 +42,23 @@ const RegisterPage = () => {
     }
   };
 
-  // Field blur
   const handleBlur = (field) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
     validateField(field, formData[field], formData);
   };
 
-  // Single field validation
   const validateField = (field, value, currentData) => {
     let err = "";
 
     if (field === "fullName") {
       if (!value?.trim()) err = "Enter your full name.";
-      else if (value.trim().length < 2) err = "Full name must be at least 2 characters.";
+      else if (value.trim().length < 3) err = "Full name must be at least 3 characters.";
+    } else if (field === "fullQualification") {
+      if (!value?.trim()) err = "Enter your qualifications.";
+      else if (value.trim().length < 2) err = "Qualification must be at least 2 characters.";
+    } else if (field === "doctorRegistrationNumber") {
+      if (!value?.trim()) err = "Enter your doctor registration number.";
+      else if (value.trim().length < 2) err = "Registration number must be at least 2 characters.";
     } else if (field === "email") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!value?.trim()) err = "Enter your email address.";
@@ -100,10 +90,15 @@ const RegisterPage = () => {
     return err;
   };
 
-  // Validate entire form
   const validateAll = () => {
     const nextErrors = {};
     nextErrors.fullName = validateField("fullName", formData.fullName, formData);
+    nextErrors.fullQualification = validateField("fullQualification", formData.fullQualification, formData);
+    nextErrors.doctorRegistrationNumber = validateField(
+      "doctorRegistrationNumber",
+      formData.doctorRegistrationNumber,
+      formData
+    );
     nextErrors.email = validateField("email", formData.email, formData);
     nextErrors.mobileNumber = validateField("mobileNumber", formData.mobileNumber, formData);
     nextErrors.password = validateField("password", formData.password, formData);
@@ -112,6 +107,8 @@ const RegisterPage = () => {
 
     setTouched({
       fullName: true,
+      fullQualification: true,
+      doctorRegistrationNumber: true,
       email: true,
       mobileNumber: true,
       password: true,
@@ -122,7 +119,6 @@ const RegisterPage = () => {
     return Object.values(nextErrors).filter(Boolean);
   };
 
-  // Handle registration submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerError("");
@@ -139,23 +135,14 @@ const RegisterPage = () => {
     try {
       const res = await registerAndVerify({
         fullName: formData.fullName.trim(),
+        fullQualification: formData.fullQualification.trim(),
+        doctorRegistrationNumber: formData.doctorRegistrationNumber.trim(),
         email: formData.email.trim().toLowerCase(),
         mobileNumber: formData.mobileNumber.replace(/\s+/g, ""),
         password: formData.password,
       });
 
-      // If server asks for OTP verification
-      if (res?.requiresEmailVerification || res?.data?.requiresEmailVerification) {
-        setRequiresOtp(true);
-      } else {
-        // Direct auto-login success
-        const lastName = extractLastName(formData.fullName);
-        addToast({
-          type: "success",
-          message: `Account created. Welcome, Dr. ${lastName}.`,
-        });
-        navigate("/dashboard");
-      }
+      setRequiresOtp(Boolean(res?.data?.requiresEmailVerification));
     } catch (err) {
       if (err.response?.status === 409) {
         setServerError("An account with this email already exists.");
@@ -170,7 +157,6 @@ const RegisterPage = () => {
     }
   };
 
-  // Handle OTP verification
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     if (!otp.trim()) {
@@ -207,7 +193,7 @@ const RegisterPage = () => {
         <div className="w-full max-w-[480px] bg-white rounded-[8px] border border-[#D5DDE3] shadow-[0_1px_2px_rgba(20,35,43,0.04)] p-6 md:p-10">
           {!requiresOtp ? (
             <>
-              {/* Heading Block */}
+
               <div className="mb-6">
                 <h1 className="text-[24px] leading-[32px] font-semibold text-[#14232B]">
                   Create your doctor account
@@ -217,7 +203,6 @@ const RegisterPage = () => {
                 </p>
               </div>
 
-              {/* Form-level Error Banner */}
               {serverError && (
                 <div className="mb-6">
                   <NoticeBanner type="error">
@@ -231,9 +216,8 @@ const RegisterPage = () => {
                 </div>
               )}
 
-              {/* Registration Form */}
               <form onSubmit={handleSubmit} noValidate className="space-y-5">
-                {/* 1. Full name */}
+
                 <TextInput
                   label="Full name"
                   name="fullName"
@@ -248,7 +232,6 @@ const RegisterPage = () => {
                   autoComplete="name"
                 />
 
-                {/* 2. Email address */}
                 <TextInput
                   label="Email address"
                   name="email"
@@ -262,7 +245,34 @@ const RegisterPage = () => {
                   autoComplete="email"
                 />
 
-                {/* 3. Mobile number (+91 prefix cell) */}
+                <TextInput
+                  label="Qualifications"
+                  name="fullQualification"
+                  placeholder="For example: MBBS, MD"
+                  value={formData.fullQualification}
+                  onChange={(e) => handleChange("fullQualification", e.target.value)}
+                  onBlur={() => handleBlur("fullQualification")}
+                  error={touched.fullQualification ? errors.fullQualification : ""}
+                  required
+                  maxLength={200}
+                />
+
+                <TextInput
+                  label="Doctor registration number"
+                  name="doctorRegistrationNumber"
+                  placeholder="Registration number"
+                  value={formData.doctorRegistrationNumber}
+                  onChange={(e) => handleChange("doctorRegistrationNumber", e.target.value)}
+                  onBlur={() => handleBlur("doctorRegistrationNumber")}
+                  error={
+                    touched.doctorRegistrationNumber
+                      ? errors.doctorRegistrationNumber
+                      : ""
+                  }
+                  required
+                  maxLength={60}
+                />
+
                 <div className="w-full">
                   <label className="text-[14px] leading-[20px] font-medium text-[#14232B] flex items-center mb-1.5">
                     Mobile number <span className="text-[#B42318] ml-1">*</span>
@@ -296,7 +306,6 @@ const RegisterPage = () => {
                   )}
                 </div>
 
-                {/* 4. Password with live rules checklist */}
                 <PasswordInput
                   label="Password"
                   name="password"
@@ -310,7 +319,6 @@ const RegisterPage = () => {
                   autoComplete="new-password"
                 />
 
-                {/* 5. Confirm password */}
                 <PasswordInput
                   label="Confirm password"
                   name="confirmPassword"
@@ -322,7 +330,6 @@ const RegisterPage = () => {
                   autoComplete="new-password"
                 />
 
-                {/* 6. Medical Practitioner Agreement Checkbox */}
                 <div className="pt-1">
                   <label className="flex items-start gap-2.5 cursor-pointer select-none">
                     <input
@@ -361,13 +368,11 @@ const RegisterPage = () => {
                   )}
                 </div>
 
-                {/* Verification Disclaimer */}
                 <p className="text-[13px] leading-[20px] text-[#5F6F7A] pt-1">
                   RxDesk does not verify medical registration. You are responsible
                   for the accuracy of the details printed on your prescriptions.
                 </p>
 
-                {/* Submit Button */}
                 <div className="pt-2">
                   <Button
                     type="submit"
@@ -381,7 +386,6 @@ const RegisterPage = () => {
                 </div>
               </form>
 
-              {/* Sibling Link */}
               <div className="mt-5 text-center text-[14px] leading-[22px] text-[#3F4F5A]">
                 Already have an account?{" "}
                 <Link to="/login" className="text-[#0F5A78] font-semibold hover:underline">
@@ -390,9 +394,7 @@ const RegisterPage = () => {
               </div>
             </>
           ) : (
-            /* ============================================================
-               OTP VERIFICATION VIEW
-               ============================================================ */
+
             <div>
               <h1 className="text-[24px] leading-[32px] font-semibold text-[#14232B]">
                 Verify your email

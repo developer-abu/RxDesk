@@ -1,11 +1,4 @@
-/**
- * TextareaInput.jsx
- *
- * Implements Design Spec §6.2:
- * - Auto-grows up to 320px, then scrolls internally
- * - Character counter appears when >= 80% of maxLength is used
- * - Accessible error handling with alert icon
- */
+
 
 import React, { useEffect, useRef, useId } from "react";
 import { AlertCircle } from "lucide-react";
@@ -33,7 +26,6 @@ const TextareaInput = ({
   const errorId = `${inputId}-error`;
   const helperId = `${inputId}-helper`;
 
-  // Auto-grow height calculation up to 320px
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;

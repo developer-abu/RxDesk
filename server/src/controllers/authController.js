@@ -7,8 +7,8 @@ const COOKIE_NAME = "rxdesk_token";
 const getCookieOptions = () => ({
   httpOnly: true,
   secure: config.nodeEnv === "production",
-  sameSite: config.nodeEnv === "production" ? "strict" : "lax",
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  sameSite: config.nodeEnv === "production" ? "none" : "lax",
+  maxAge: 7 * 24 * 60 * 60 * 1000,
   path: "/",
 });
 
@@ -18,6 +18,7 @@ export const handleRegister = async (req, res, next) => {
     return successResponse(res, 200, result.message, {
       email: result.email,
       expiresInMinutes: result.expiresInMinutes,
+      requiresEmailVerification: true,
     });
   } catch (error) {
     next(error);
@@ -57,7 +58,7 @@ export const handleLogout = async (req, res, next) => {
     res.clearCookie(COOKIE_NAME, {
       httpOnly: true,
       secure: config.nodeEnv === "production",
-      sameSite: config.nodeEnv === "production" ? "strict" : "lax",
+      sameSite: config.nodeEnv === "production" ? "none" : "lax",
       path: "/",
     });
 
@@ -69,11 +70,12 @@ export const handleLogout = async (req, res, next) => {
 
 export const handleGetMe = async (req, res, next) => {
   try {
-    // req.doctor is populated by authenticate middleware
+
     const doctor = {
       id: req.doctor._id ? req.doctor._id.toString() : req.doctor.id,
       fullName: req.doctor.fullName,
       email: req.doctor.email,
+      mobileNumber: req.doctor.mobileNumber,
       fullQualification: req.doctor.fullQualification,
       doctorRegistrationNumber: req.doctor.doctorRegistrationNumber,
     };
@@ -101,4 +103,3 @@ export const handleResetPassword = async (req, res, next) => {
     next(error);
   }
 };
-

@@ -1,11 +1,4 @@
-/**
- * ChamberDropdown.jsx
- *
- * Implements Design Spec §6.3 & §12.3:
- * - ARIA combobox pattern
- * - Displays ONLY chamber names
- * - Handles loading, load error, empty with Create Chamber action, and selection
- */
+
 
 import React, { useState, useRef, useEffect, useId } from "react";
 import { Link } from "react-router-dom";
@@ -28,14 +21,12 @@ const ChamberDropdown = ({
   const dropdownRef = useRef(null);
   const listboxId = useId();
 
-  // Sort chambers alphabetically by chamberName
   const sortedChambers = [...chambers].sort((a, b) =>
     (a.chamberName || "").localeCompare(b.chamberName || "")
   );
 
   const selectedChamber = sortedChambers.find((c) => c._id === selectedChamberId);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -46,7 +37,6 @@ const ChamberDropdown = ({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
 
-  // Keyboard navigation
   const handleKeyDown = (e) => {
     if (isLoading || loadError || sortedChambers.length === 0) return;
 
@@ -92,7 +82,6 @@ const ChamberDropdown = ({
         </span>
       </div>
 
-      {/* Trigger */}
       <button
         type="button"
         role="combobox"
@@ -137,7 +126,6 @@ const ChamberDropdown = ({
         Chamber details appear on the prescription automatically.
       </p>
 
-      {/* Validation Error */}
       {error && (
         <p
           role="alert"
@@ -148,7 +136,6 @@ const ChamberDropdown = ({
         </p>
       )}
 
-      {/* Load error message */}
       {loadError && (
         <div className="flex items-center gap-2 text-[13px] leading-[18px] text-[#B42318] mt-1">
           <AlertCircle className="w-4 h-4 shrink-0" strokeWidth={1.75} />
@@ -165,7 +152,6 @@ const ChamberDropdown = ({
         </div>
       )}
 
-      {/* Empty State Warning */}
       {!isLoading && !loadError && sortedChambers.length === 0 && (
         <div className="mt-2 p-3 bg-[#FFF4DB] border border-[#E8C873] rounded-[6px] flex flex-col gap-2">
           <div className="flex items-start gap-2 text-[13px] leading-[18px] text-[#8A5A00]">
@@ -185,7 +171,6 @@ const ChamberDropdown = ({
         </div>
       )}
 
-      {/* Dropdown Panel */}
       {isOpen && sortedChambers.length > 0 && (
         <div
           id={listboxId}

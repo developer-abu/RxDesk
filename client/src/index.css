@@ -1,13 +1,7 @@
 @import "tailwindcss";
 
-/* ============================================================
-   RXDESK — DESIGN SYSTEM TOKENS
-   All values sourced from the UI/UX Design Specification v1.0
-   Do NOT add colors, radii, or spacing values not defined here.
-   ============================================================ */
-
 @theme {
-  /* --- Custom Breakpoints (user-defined) --- */
+
   --breakpoint-mobile: 360px;
   --breakpoint-mobile-lg: 480px;
   --breakpoint-tablet: 768px;
@@ -15,36 +9,28 @@
   --breakpoint-desktop: 1280px;
   --breakpoint-wide: 1536px;
 
-  /* --- Color Palette --- */
-  /* Primary */
   --color-primary:         #0F5A78;
   --color-primary-hover:   #0B475F;
   --color-primary-active:  #083849;
   --color-primary-tint:    #E6F0F4;
 
-  /* Backgrounds */
   --color-page:       #F4F6F8;
   --color-hero:       #EEF4F7;
   --color-card:       #FFFFFF;
 
-  /* Text */
   --color-text-primary:   #14232B;
   --color-text-secondary: #3F4F5A;
   --color-text-muted:     #5F6F7A;
   --color-placeholder:    #66757F;
 
-  /* Borders */
   --color-border-decorative: #D5DDE3;
   --color-border-control-light: #B7C3CC;
   --color-border-control-strong: #7D8D98;
 
-  /* Input */
   --color-input-bg: #FFFFFF;
 
-  /* Focus */
   --color-focus: #1B7FB5;
 
-  /* Semantic States */
   --color-success:         #1E7B4F;
   --color-success-bg:      #E7F4EC;
   --color-success-border:  #A9D6BC;
@@ -63,25 +49,20 @@
   --color-info-bg:         #EAF3F8;
   --color-info-border:     #BFD8E6;
 
-  /* Disabled */
   --color-disabled-bg:     #EEF1F4;
   --color-disabled-text:   #8A98A3;
   --color-disabled-border: #D5DDE3;
   --color-disabled-btn-bg: #D5DDE3;
   --color-disabled-btn-text: #7B8A95;
 
-  /* Overlay */
   --color-overlay: rgba(20, 35, 43, 0.5);
 
-  /* Ink (for shadows) */
   --color-ink: #14232B;
 
-  /* --- Typography --- */
   --font-sans:  "Poppins", "Noto Sans", "Noto Sans Bengali", "Noto Sans Devanagari",
                 "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-serif: "Noto Serif", Georgia, "Times New Roman", serif;
 
-  /* --- Spacing Scale (4px base) --- */
   --spacing-1:  4px;
   --spacing-1h: 6px;
   --spacing-2:  8px;
@@ -95,28 +76,21 @@
   --spacing-16: 64px;
   --spacing-20: 80px;
 
-  /* --- Border Radius --- */
   --radius-sm:   4px;
   --radius-control: 6px;
   --radius-card: 8px;
 
-  /* --- Shadows --- */
   --shadow-card:     0 1px 2px rgba(20, 35, 43, 0.04);
   --shadow-dropdown: 0 4px 12px rgba(20, 35, 43, 0.12);
   --shadow-toast:    0 4px 12px rgba(20, 35, 43, 0.16);
   --shadow-modal:    0 12px 32px rgba(20, 35, 43, 0.18);
 
-  /* --- Control Dimensions --- */
   --control-height:       44px;
   --control-height-sm:    36px;
   --control-height-lg:    48px;
   --header-height:        60px;
   --action-bar-height:    56px;
 }
-
-/* ============================================================
-   GLOBAL BASE STYLES
-   ============================================================ */
 
 *,
 *::before,
@@ -125,11 +99,10 @@
 }
 
 html {
-  /* Prevent mobile browser font boosting */
+
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  /* Smooth scroll only for anchor navigation, NOT globally
-     — keep scrolling instant for prescription-page UX */
+
   scroll-behavior: auto;
 }
 
@@ -139,31 +112,21 @@ body {
   line-height: 22px;
   color: var(--color-text-primary);
   background-color: var(--color-page);
-  /* Prevent horizontal overflow at page level */
+
   overflow-x: hidden;
-  /* Security: prevent text selection on UI chrome (not content) */
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-/* ============================================================
-   FOCUS — NEVER REMOVE OR OVERRIDE
-   2px solid #1B7FB5 outline with 2px offset on every interactive element
-   ============================================================ */
 
 :focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 
-/* Remove default focus ring only when :focus-visible is supported */
 :focus:not(:focus-visible) {
   outline: none;
 }
-
-/* ============================================================
-   SKIP TO MAIN CONTENT — Accessibility first tab stop
-   ============================================================ */
 
 .skip-link {
   position: absolute;
@@ -184,11 +147,6 @@ body {
   top: 8px;
 }
 
-/* ============================================================
-   TYPOGRAPHY SCALE
-   ============================================================ */
-
-/* Landing hero heading */
 .text-hero {
   font-size: 44px;
   line-height: 52px;
@@ -197,7 +155,6 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Landing section heading */
 .text-section-heading {
   font-size: 28px;
   line-height: 36px;
@@ -205,7 +162,6 @@ body {
   color: var(--color-text-primary);
 }
 
-/* Main page heading (app) */
 .text-page-heading {
   font-size: 24px;
   line-height: 32px;
@@ -213,17 +169,12 @@ body {
   color: var(--color-text-primary);
 }
 
-/* Card / subsection title */
 .text-card-title {
   font-size: 18px;
   line-height: 26px;
   font-weight: 600;
   color: var(--color-text-primary);
 }
-
-/* ============================================================
-   SCROLLBAR — subtle but functional
-   ============================================================ */
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -240,11 +191,6 @@ body {
   background: var(--color-border-control-strong);
 }
 
-/* ============================================================
-   LAYOUT UTILITIES
-   Max-widths per specification
-   ============================================================ */
-
 .container-landing   { max-width: 1200px; margin-inline: auto; }
 .container-dashboard { max-width: 1200px; margin-inline: auto; }
 .container-chamber   { max-width: 880px;  margin-inline: auto; }
@@ -252,7 +198,6 @@ body {
 .container-rx        { max-width: 1440px; margin-inline: auto; }
 .container-legal     { max-width: 720px;  margin-inline: auto; }
 
-/* Page horizontal padding per breakpoint */
 .page-px {
   padding-inline: 16px;
 }
@@ -261,12 +206,6 @@ body {
 @media (min-width: 1280px) { .page-px { padding-inline: 24px; } }
 @media (min-width: 1440px) { .page-px { padding-inline: 32px; } }
 
-/* ============================================================
-   FORM CONTROLS — Base styles
-   Override in component JSX with Tailwind classes as needed
-   ============================================================ */
-
-/* Input / Textarea / Select shared base */
 .field-base {
   width: 100%;
   height: var(--control-height);
@@ -308,7 +247,6 @@ body {
   border-color: var(--color-error);
 }
 
-/* Textarea overrides */
 textarea.field-base {
   height: auto;
   padding: 10px 12px;
@@ -316,17 +254,12 @@ textarea.field-base {
   overflow-y: auto;
 }
 
-/* Below 768px — inputs get 16px font to prevent iOS zoom */
 @media (max-width: 767px) {
   .field-base {
     font-size: 16px;
     line-height: 24px;
   }
 }
-
-/* ============================================================
-   SPINNER
-   ============================================================ */
 
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -341,16 +274,11 @@ textarea.field-base {
   animation: spin 0.8s linear infinite;
 }
 
-/* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .spinner {
     animation-duration: 2s;
   }
 }
-
-/* ============================================================
-   SKELETON PULSE
-   ============================================================ */
 
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 1; }
@@ -368,10 +296,6 @@ textarea.field-base {
     animation: none;
   }
 }
-
-/* ============================================================
-   TOAST ANIMATIONS
-   ============================================================ */
 
 @keyframes toast-in {
   from { opacity: 0; transform: translateY(-8px); }
@@ -391,47 +315,34 @@ textarea.field-base {
   animation: toast-out 120ms ease forwards;
 }
 
-/* ============================================================
-   A4 PRESCRIPTION — PRINT & PREVIEW
-   
-   The A4 sheet component renders 794 × 1123px in the browser.
-   On print, each sheet maps exactly to one A4 page.
-   No app UI chrome ever prints.
-   ============================================================ */
-
-/* A4 sheet — screen */
 .a4-sheet {
   width: 794px;
   min-height: 1123px;
   background: #ffffff;
   box-sizing: border-box;
-  /* 12mm top, 15mm right, 15mm bottom, 15mm left at 96dpi */
+
   padding: 45px 57px 57px 57px;
   position: relative;
   overflow: hidden;
 }
 
-/* A4 sheet typography — print document */
 .a4-sheet {
   font-family: var(--font-sans);
-  font-size: 14px; /* will be overridden by print-specific classes */
+  font-size: 14px;
   color: #000000;
 }
 
-/* ---- PRINT MEDIA QUERY ---- */
 @media print {
-  /* Reset page */
+
   @page {
     size: A4 portrait;
     margin: 0;
   }
 
-  /* Hide EVERYTHING except A4 sheets */
   body > #root {
     background: white !important;
   }
 
-  /* Hide all app chrome */
   header,
   nav,
   .action-bar,
@@ -446,12 +357,10 @@ textarea.field-base {
     display: none !important;
   }
 
-  /* Show only the print wrapper */
   .print-wrapper {
     display: block !important;
   }
 
-  /* Each A4 sheet = one printed page */
   .a4-sheet {
     width: 210mm;
     min-height: 297mm;
@@ -462,17 +371,15 @@ textarea.field-base {
     overflow: hidden;
     box-shadow: none !important;
     border: none !important;
-    /* Reset any screen scaling */
+
     transform: none !important;
   }
 
-  /* Last sheet: no trailing page break */
   .a4-sheet:last-child {
     page-break-after: avoid;
     break-after: avoid;
   }
 
-  /* Print typography */
   .print-doctor-name {
     font-family: var(--font-serif);
     font-size: 18pt;
@@ -559,7 +466,6 @@ textarea.field-base {
     color: #333333;
   }
 
-  /* Medicine table */
   .print-table {
     width: 100%;
     border-collapse: collapse;
@@ -589,7 +495,6 @@ textarea.field-base {
     border-bottom: 0.25pt solid #666666;
   }
 
-  /* Medicine table column widths (total 180mm) */
   .print-col-no   { width: 8mm; }
   .print-col-med  { width: 70mm; }
   .print-col-dose { width: 20mm; }
@@ -597,7 +502,6 @@ textarea.field-base {
   .print-col-freq { width: 34mm; }
   .print-col-dur  { width: 30mm; }
 
-  /* Page number */
   .print-page-number {
     font-size: 8pt;
     color: #333333;
@@ -608,7 +512,6 @@ textarea.field-base {
     right: 0;
   }
 
-  /* Stamp + Signature block */
   .print-stamp-sig-block {
     display: flex;
     gap: 8mm;
@@ -637,28 +540,21 @@ textarea.field-base {
     width: 100%;
   }
 
-  /* Keep page breaks sane */
   .print-keep-together {
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  /* Never allow widow/orphan first or last lines alone */
   p {
     orphans: 3;
     widows: 3;
   }
 
-  /* Backgrounds and graphics OFF — no dependency on "Background graphics" */
   * {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 }
-
-/* ============================================================
-   REDUCED MOTION — Honor system preference
-   ============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -670,26 +566,16 @@ textarea.field-base {
     scroll-behavior: auto !important;
   }
 
-  /* Keep spinners — they communicate loading progress */
   .spinner {
     animation-duration: 2s !important;
     animation-iteration-count: infinite !important;
   }
 }
 
-/* ============================================================
-   SECURITY — Prevent prescription content from being selected
-   and copied by accident while in preview (screen only)
-   ============================================================ */
-
 .preview-panel .a4-sheet {
   user-select: none;
   -webkit-user-select: none;
 }
-
-/* ============================================================
-   VISITING DAYS CHIP — used in Create Chamber
-   ============================================================ */
 
 .day-chip {
   display: inline-flex;
@@ -721,10 +607,6 @@ textarea.field-base {
   color: var(--color-primary);
   font-weight: 600;
 }
-
-/* ============================================================
-   SEGMENTED CONTROL — Sex field, Preview toggle
-   ============================================================ */
 
 .segment-control {
   display: flex;
@@ -763,10 +645,6 @@ textarea.field-base {
 .segment-control__option:hover:not([aria-checked="true"]) {
   background: var(--color-page);
 }
-
-/* ============================================================
-   EMPTY STATE — dashed border box
-   ============================================================ */
 
 .empty-state {
   border: 1px dashed var(--color-border-control-light);
@@ -775,10 +653,6 @@ textarea.field-base {
   text-align: center;
 }
 
-/* ============================================================
-   GLOBAL BASE STYLES
-   ============================================================ */
-
 *,
 *::before,
 *::after {
@@ -786,11 +660,10 @@ textarea.field-base {
 }
 
 html {
-  /* Prevent mobile browser font boosting */
+
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  /* Smooth scroll only for anchor navigation, NOT globally
-     — keep scrolling instant for prescription-page UX */
+
   scroll-behavior: auto;
 }
 
@@ -800,31 +673,21 @@ body {
   line-height: 22px;
   color: var(--color-text-primary);
   background-color: var(--color-page);
-  /* Prevent horizontal overflow at page level */
+
   overflow-x: hidden;
-  /* Security: prevent text selection on UI chrome (not content) */
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-/* ============================================================
-   FOCUS — NEVER REMOVE OR OVERRIDE
-   2px solid #1B7FB5 outline with 2px offset on every interactive element
-   ============================================================ */
 
 :focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 
-/* Remove default focus ring only when :focus-visible is supported */
 :focus:not(:focus-visible) {
   outline: none;
 }
-
-/* ============================================================
-   SKIP TO MAIN CONTENT — Accessibility first tab stop
-   ============================================================ */
 
 .skip-link {
   position: absolute;
@@ -845,11 +708,6 @@ body {
   top: 8px;
 }
 
-/* ============================================================
-   TYPOGRAPHY SCALE
-   ============================================================ */
-
-/* Landing hero heading */
 .text-hero {
   font-size: 44px;
   line-height: 52px;
@@ -858,7 +716,6 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Landing section heading */
 .text-section-heading {
   font-size: 28px;
   line-height: 36px;
@@ -866,7 +723,6 @@ body {
   color: var(--color-text-primary);
 }
 
-/* Main page heading (app) */
 .text-page-heading {
   font-size: 24px;
   line-height: 32px;
@@ -874,17 +730,12 @@ body {
   color: var(--color-text-primary);
 }
 
-/* Card / subsection title */
 .text-card-title {
   font-size: 18px;
   line-height: 26px;
   font-weight: 600;
   color: var(--color-text-primary);
 }
-
-/* ============================================================
-   SCROLLBAR — subtle but functional
-   ============================================================ */
 
 ::-webkit-scrollbar {
   width: 6px;
@@ -901,11 +752,6 @@ body {
   background: var(--color-border-control-strong);
 }
 
-/* ============================================================
-   LAYOUT UTILITIES
-   Max-widths per specification
-   ============================================================ */
-
 .container-landing   { max-width: 1200px; margin-inline: auto; }
 .container-dashboard { max-width: 1200px; margin-inline: auto; }
 .container-chamber   { max-width: 880px;  margin-inline: auto; }
@@ -913,7 +759,6 @@ body {
 .container-rx        { max-width: 1440px; margin-inline: auto; }
 .container-legal     { max-width: 720px;  margin-inline: auto; }
 
-/* Page horizontal padding per breakpoint */
 .page-px {
   padding-inline: 16px;
 }
@@ -922,12 +767,6 @@ body {
 @media (min-width: 1280px) { .page-px { padding-inline: 24px; } }
 @media (min-width: 1440px) { .page-px { padding-inline: 32px; } }
 
-/* ============================================================
-   FORM CONTROLS — Base styles
-   Override in component JSX with Tailwind classes as needed
-   ============================================================ */
-
-/* Input / Textarea / Select shared base */
 .field-base {
   width: 100%;
   height: var(--control-height);
@@ -969,7 +808,6 @@ body {
   border-color: var(--color-error);
 }
 
-/* Textarea overrides */
 textarea.field-base {
   height: auto;
   padding: 10px 12px;
@@ -977,17 +815,12 @@ textarea.field-base {
   overflow-y: auto;
 }
 
-/* Below 768px — inputs get 16px font to prevent iOS zoom */
 @media (max-width: 767px) {
   .field-base {
     font-size: 16px;
     line-height: 24px;
   }
 }
-
-/* ============================================================
-   SPINNER
-   ============================================================ */
 
 @keyframes spin {
   to { transform: rotate(360deg); }
@@ -1002,16 +835,11 @@ textarea.field-base {
   animation: spin 0.8s linear infinite;
 }
 
-/* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .spinner {
     animation-duration: 2s;
   }
 }
-
-/* ============================================================
-   SKELETON PULSE
-   ============================================================ */
 
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 1; }
@@ -1029,10 +857,6 @@ textarea.field-base {
     animation: none;
   }
 }
-
-/* ============================================================
-   TOAST ANIMATIONS
-   ============================================================ */
 
 @keyframes toast-in {
   from { opacity: 0; transform: translateY(-8px); }
@@ -1052,47 +876,34 @@ textarea.field-base {
   animation: toast-out 120ms ease forwards;
 }
 
-/* ============================================================
-   A4 PRESCRIPTION — PRINT & PREVIEW
-   
-   The A4 sheet component renders 794 × 1123px in the browser.
-   On print, each sheet maps exactly to one A4 page.
-   No app UI chrome ever prints.
-   ============================================================ */
-
-/* A4 sheet — screen */
 .a4-sheet {
   width: 794px;
   min-height: 1123px;
   background: #ffffff;
   box-sizing: border-box;
-  /* 12mm top, 15mm right, 15mm bottom, 15mm left at 96dpi */
+
   padding: 45px 57px 57px 57px;
   position: relative;
   overflow: hidden;
 }
 
-/* A4 sheet typography — print document */
 .a4-sheet {
   font-family: var(--font-sans);
-  font-size: 14px; /* will be overridden by print-specific classes */
+  font-size: 14px;
   color: #000000;
 }
 
-/* ---- PRINT MEDIA QUERY ---- */
 @media print {
-  /* Reset page */
+
   @page {
     size: A4 portrait;
     margin: 0;
   }
 
-  /* Hide EVERYTHING except A4 sheets */
   body > #root {
     background: white !important;
   }
 
-  /* Hide all app chrome */
   header,
   nav,
   .action-bar,
@@ -1107,12 +918,10 @@ textarea.field-base {
     display: none !important;
   }
 
-  /* Show only the print wrapper */
   .print-wrapper {
     display: block !important;
   }
 
-  /* Each A4 sheet = one printed page */
   .a4-sheet {
     width: 210mm;
     min-height: 297mm;
@@ -1123,17 +932,15 @@ textarea.field-base {
     overflow: hidden;
     box-shadow: none !important;
     border: none !important;
-    /* Reset any screen scaling */
+
     transform: none !important;
   }
 
-  /* Last sheet: no trailing page break */
   .a4-sheet:last-child {
     page-break-after: avoid;
     break-after: avoid;
   }
 
-  /* Print typography */
   .print-doctor-name {
     font-family: var(--font-serif);
     font-size: 18pt;
@@ -1220,7 +1027,6 @@ textarea.field-base {
     color: #333333;
   }
 
-  /* Medicine table */
   .print-table {
     width: 100%;
     border-collapse: collapse;
@@ -1250,7 +1056,6 @@ textarea.field-base {
     border-bottom: 0.25pt solid #666666;
   }
 
-  /* Medicine table column widths (total 180mm) */
   .print-col-no   { width: 8mm; }
   .print-col-med  { width: 70mm; }
   .print-col-dose { width: 20mm; }
@@ -1258,7 +1063,6 @@ textarea.field-base {
   .print-col-freq { width: 34mm; }
   .print-col-dur  { width: 30mm; }
 
-  /* Page number */
   .print-page-number {
     font-size: 8pt;
     color: #333333;
@@ -1269,7 +1073,6 @@ textarea.field-base {
     right: 0;
   }
 
-  /* Stamp + Signature block */
   .print-stamp-sig-block {
     display: flex;
     gap: 8mm;
@@ -1298,28 +1101,21 @@ textarea.field-base {
     width: 100%;
   }
 
-  /* Keep page breaks sane */
   .print-keep-together {
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  /* Never allow widow/orphan first or last lines alone */
   p {
     orphans: 3;
     widows: 3;
   }
 
-  /* Backgrounds and graphics OFF — no dependency on "Background graphics" */
   * {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 }
-
-/* ============================================================
-   REDUCED MOTION — Honor system preference
-   ============================================================ */
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -1331,26 +1127,16 @@ textarea.field-base {
     scroll-behavior: auto !important;
   }
 
-  /* Keep spinners — they communicate loading progress */
   .spinner {
     animation-duration: 2s !important;
     animation-iteration-count: infinite !important;
   }
 }
 
-/* ============================================================
-   SECURITY — Prevent prescription content from being selected
-   and copied by accident while in preview (screen only)
-   ============================================================ */
-
 .preview-panel .a4-sheet {
   user-select: none;
   -webkit-user-select: none;
 }
-
-/* ============================================================
-   VISITING DAYS CHIP — used in Create Chamber
-   ============================================================ */
 
 .day-chip {
   display: inline-flex;
@@ -1382,10 +1168,6 @@ textarea.field-base {
   color: var(--color-primary);
   font-weight: 600;
 }
-
-/* ============================================================
-   SEGMENTED CONTROL — Sex field, Preview toggle
-   ============================================================ */
 
 .segment-control {
   display: flex;
@@ -1424,10 +1206,6 @@ textarea.field-base {
 .segment-control__option:hover:not([aria-checked="true"]) {
   background: var(--color-page);
 }
-
-/* ============================================================
-   EMPTY STATE — dashed border box
-   ============================================================ */
 
 .empty-state {
   border: 1px dashed var(--color-border-control-light);

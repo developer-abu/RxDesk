@@ -1,10 +1,4 @@
-/**
- * A4Sheet.jsx
- *
- * Implements Design Spec §13:
- * Dedicated discrete A4 sheet renderer (794 × 1123 px at 96 DPI / 210 × 297 mm in print).
- * Pure document styling: black on white, no app chrome, grayscale-friendly.
- */
+
 
 import React from "react";
 import { formatAgeSex, formatDate, abbreviateRoute, formatVisitingLine } from "../../utils/formatUtils";
@@ -32,26 +26,26 @@ const A4Sheet = ({
   const chamberName = chamber?.chamberName || "";
   const address = chamber?.address || "";
   const contactNumber = chamber?.contactNumber || "";
-  const visitingLine = formatVisitingLine(chamber?.visitingDays, chamber?.visitingSessions);
+  const visitingLine = formatVisitingLine(
+    chamber?.visitingDays,
+    chamber?.visitingSessions || chamber?.visitingHours
+  );
 
   const formattedDate = formatDate(consultationDate);
   const formattedAgeSex = formatAgeSex(age, ageUnit, sex);
 
-  // Group medicine items for this page
   const medicineItems = items.filter((it) => it.type === "medicine");
   const hasMedicines = medicineItems.length > 0;
 
   return (
     <div className="a4-sheet bg-white border border-[#B7C3CC] shadow-[0_1px_2px_rgba(20,35,43,0.04)] print:shadow-none print:border-none flex flex-col justify-between relative select-none">
       <div>
-        {/* ============================================================
-            PAGE 1: LETTERHEAD + PATIENT STRIP
-            ============================================================ */}
+
         {isFirstPage ? (
           <div>
-            {/* Letterhead Zones */}
+
             <div className="flex justify-between items-start gap-4">
-              {/* Left Zone: Doctor info (100mm) */}
+
               <div className="w-[378px] shrink-0">
                 <h1 className="print-doctor-name text-[22px] leading-[26px] font-bold text-black font-serif">
                   {doctorName}
@@ -68,7 +62,6 @@ const A4Sheet = ({
                 )}
               </div>
 
-              {/* Right Zone: Chamber info (75mm) */}
               <div className="w-[283px] shrink-0 text-left">
                 {chamberName ? (
                   <>
@@ -101,12 +94,10 @@ const A4Sheet = ({
               </div>
             </div>
 
-            {/* Heavy Rule: 1.5pt solid black */}
             <div className="w-full h-[2px] bg-black my-2.5" />
 
-            {/* Patient Strip */}
             <div className="flex items-center justify-between pb-2 border-b border-black text-[14px] leading-[18px]">
-              {/* Name */}
+
               <div className="flex-1 pr-4">
                 <span className="print-label text-[11px] font-bold uppercase tracking-[0.04em] text-black block mb-0.5">
                   PATIENT NAME
@@ -116,7 +107,6 @@ const A4Sheet = ({
                 </span>
               </div>
 
-              {/* Age / Sex */}
               <div className="w-[150px] shrink-0 pr-4">
                 <span className="print-label text-[11px] font-bold uppercase tracking-[0.04em] text-black block mb-0.5">
                   AGE / SEX
@@ -126,7 +116,6 @@ const A4Sheet = ({
                 </span>
               </div>
 
-              {/* Date */}
               <div className="w-[120px] shrink-0">
                 <span className="print-label text-[11px] font-bold uppercase tracking-[0.04em] text-black block mb-0.5">
                   DATE
@@ -138,9 +127,7 @@ const A4Sheet = ({
             </div>
           </div>
         ) : (
-          /* ============================================================
-             CONTINUATION PAGE RUNNING HEADER (Page 2+)
-             ============================================================ */
+
           <div className="pb-2 mb-4 border-b border-black flex items-center justify-between text-[12px] font-semibold text-black">
             <span>
               {doctorName} {regNo ? `· Reg. No. ${regNo}` : ""}
@@ -151,11 +138,8 @@ const A4Sheet = ({
           </div>
         )}
 
-        {/* ============================================================
-            CONTENT ITEMS (Clinical notes, Medicines, Advice)
-            ============================================================ */}
         <div className="mt-4 space-y-4">
-          {/* 1. Clinical Sections */}
+
           {items
             .filter((it) => it.type === "clinical")
             .map((it, idx) => (
@@ -169,7 +153,6 @@ const A4Sheet = ({
               </div>
             ))}
 
-          {/* 2. Medicine Section */}
           {hasMedicines && (
             <div className="mt-4">
               <div className="print-rx-glyph text-[24px] font-bold font-serif mb-1 leading-none text-black">
@@ -227,7 +210,6 @@ const A4Sheet = ({
             </div>
           )}
 
-          {/* 3. Advice and Follow-up */}
           {items
             .filter((it) => it.type === "advice" || it.type === "followup")
             .map((it, idx) => (
@@ -243,14 +225,11 @@ const A4Sheet = ({
         </div>
       </div>
 
-      {/* ============================================================
-          BOTTOM: STAMP & SIGNATURE BLOCK (Last Page Only) & PAGE NUMBER
-          ============================================================ */}
       <div className="mt-8">
         {hasStampSig && (
           <div className="print-keep-together mb-6">
             <div className="print-stamp-sig-block flex items-end justify-end gap-6 ml-auto">
-              {/* Doctor Stamp Box */}
+
               <div className="flex flex-col items-center">
                 <div className="print-stamp-box w-[226px] h-[120px] border border-dashed border-[#666666] flex items-center justify-center">
                   <span className="text-[11px] text-[#666666]/50">Physical Stamp Area</span>
@@ -260,7 +239,6 @@ const A4Sheet = ({
                 </span>
               </div>
 
-              {/* Doctor Signature Line */}
               <div className="print-sig-area w-[253px] flex flex-col justify-end">
                 <div className="print-sig-line border-b border-black w-full h-[85px]" />
                 <div className="mt-1.5 text-center">
@@ -274,14 +252,12 @@ const A4Sheet = ({
               </div>
             </div>
 
-            {/* Validity Notice */}
             <p className="print-caption text-[10.5px] text-[#333333] text-center mt-3">
               Valid only when signed and stamped by the doctor.
             </p>
           </div>
         )}
 
-        {/* Page Number (shown only if totalPages > 1) */}
         {totalPages > 1 && (
           <div className="print-page-number text-[11px] text-[#333333] text-center pb-2">
             Page {pageNumber} of {totalPages}
@@ -293,4 +269,3 @@ const A4Sheet = ({
 };
 
 export default A4Sheet;
-

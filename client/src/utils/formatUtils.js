@@ -1,17 +1,11 @@
-/**
- * formatUtils.js
- *
- * Pure formatting functions with arrow functions.
- */
 
-/* ---- Date: DD/MM/YYYY ---- */
+
 export const formatDate = (isoString) => {
   if (!isoString) return "";
   const [year, month, day] = isoString.split("-");
   return `${day}/${month}/${year}`;
 };
 
-/* ---- Age display ---- */
 export const formatAge = (age, unit) => {
   if (!age) return "";
   const num = parseInt(age, 10);
@@ -20,7 +14,6 @@ export const formatAge = (age, unit) => {
   return `${num} ${label}`;
 };
 
-/* ---- Age + Sex combined ---- */
 export const formatAgeSex = (age, ageUnit, sex) => {
   const ageStr = formatAge(age, ageUnit);
   if (!ageStr && !sex) return "";
@@ -29,7 +22,6 @@ export const formatAgeSex = (age, ageUnit, sex) => {
   return `${ageStr} / ${sex}`;
 };
 
-/* ---- Visiting days formatter ---- */
 const DAY_ORDER = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export const formatVisitingDays = (days) => {
@@ -64,7 +56,6 @@ export const formatVisitingDays = (days) => {
   return groups.join(", ");
 };
 
-/* ---- Visiting hours ---- */
 export const formatVisitingHours = (sessions) => {
   if (!sessions || sessions.length === 0) return "";
   return sessions
@@ -73,17 +64,16 @@ export const formatVisitingHours = (sessions) => {
     .join(", ");
 };
 
-/* ---- Visiting line (days · hours) ---- */
 export const formatVisitingLine = (days, sessions) => {
   const daysStr = formatVisitingDays(days);
-  const hoursStr = formatVisitingHours(sessions);
+  const hoursStr =
+    typeof sessions === "string" ? sessions : formatVisitingHours(sessions);
   if (!daysStr && !hoursStr) return "";
   if (!daysStr) return hoursStr;
   if (!hoursStr) return daysStr;
   return `${daysStr} · ${hoursStr}`;
 };
 
-/* ---- Route abbreviations for printed table ---- */
 const ROUTE_ABBR = {
   "Oral": "Oral",
   "Sublingual": "SL",
@@ -103,14 +93,12 @@ export const abbreviateRoute = (route) => {
   return ROUTE_ABBR[route] || route;
 };
 
-/* ---- Extract last name for toast greeting ---- */
 export const extractLastName = (fullName) => {
   if (!fullName) return "";
   const parts = fullName.trim().split(/\s+/);
   return parts[parts.length - 1];
 };
 
-/* ---- Prevent XSS: sanitize text for display (strip HTML tags) ---- */
 export const sanitizeText = (str) => {
   if (typeof str !== "string") return "";
   return str.replace(/<[^>]*>/g, "");

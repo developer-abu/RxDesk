@@ -1,12 +1,4 @@
-/**
- * pdfExport.js
- *
- * Client-side PDF generation using jsPDF and jspdf-autotable.
- * Adheres to strict privacy rules:
- * - Runs 100% in local browser memory
- * - Never uploads or transmits PDF to server
- * - Uses exact A4 dimensions: 210 × 297 mm
- */
+
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -40,18 +32,18 @@ export const generatePrescriptionPDF = (prescriptionState, chamber) => {
   const chamberName = chamber?.chamberName || "";
   const address = chamber?.address || "";
   const contactNumber = chamber?.contactNumber || "";
-  const visitingLine = formatVisitingLine(chamber?.visitingDays, chamber?.visitingSessions);
+  const visitingLine = formatVisitingLine(
+    chamber?.visitingDays,
+    chamber?.visitingSessions || chamber?.visitingHours
+  );
 
   const formattedDate = formatDate(consultationDate);
   const formattedAgeSex = formatAgeSex(age, ageUnit, sex);
 
-  // Margins: Top 12mm, Left 15mm, Right 15mm, Bottom 15mm
   const leftMargin = 15;
-  const pageWidth = 210;
   const contentWidth = 180;
   let cursorY = 12;
 
-  // --- 1. Letterhead ---
   doc.setFont("times", "bold");
   doc.setFontSize(18);
   doc.text(doctorName, leftMargin, cursorY + 6);
@@ -66,7 +58,6 @@ export const generatePrescriptionPDF = (prescriptionState, chamber) => {
     doc.text(`Reg. No.: ${regNo}`, leftMargin, cursorY + 16);
   }
 
-  // Right zone: Chamber details
   if (chamberName) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
@@ -93,14 +84,12 @@ export const generatePrescriptionPDF = (prescriptionState, chamber) => {
     cursorY += 22;
   }
 
-  // Heavy Rule: 1.5pt solid black
   cursorY += 2;
-  doc.setLineWidth(0.5); // mm
+  doc.setLineWidth(0.5);
   doc.setDrawColor(0, 0, 0);
   doc.line(leftMargin, cursorY, leftMargin + contentWidth, cursorY);
   cursorY += 4;
 
-  // --- 2. Patient Strip ---
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
   doc.text("PATIENT NAME", leftMargin, cursorY);
@@ -119,7 +108,6 @@ export const generatePrescriptionPDF = (prescriptionState, chamber) => {
   doc.line(leftMargin, cursorY, leftMargin + contentWidth, cursorY);
   cursorY += 6;
 
-  // --- 3. Clinical Sections ---
   const addClinicalSection = (label, text) => {
     if (!text?.trim()) return;
     doc.setFont("helvetica", "bold");
@@ -138,7 +126,6 @@ export const generatePrescriptionPDF = (prescriptionState, chamber) => {
   addClinicalSection("DIAGNOSIS", diagnosis);
   addClinicalSection("INVESTIGATIONS", investigations);
 
-  // --- 4. Medicine Section ---
   const validMeds = medicines.filter((m) => m.name && m.name.trim() !== "");
   if (validMeds.length > 0) {
     cursorY += 2;
@@ -196,32 +183,27 @@ export const generatePrescriptionPDF = (prescriptionState, chamber) => {
     cursorY += 6;
   }
 
-  // --- 5. Advice and Follow-up ---
   addClinicalSection("ADVICE", advice);
   addClinicalSection("FOLLOW-UP", followUp);
 
-  // Check if we need space for Stamp & Signature
   if (cursorY > 240) {
     doc.addPage();
     cursorY = 20;
   }
 
-  // --- 6. Stamp & Signature Block (Bottom of last page) ---
   const sigBoxY = Math.max(cursorY + 10, 245);
   const stampX = leftMargin + contentWidth - 135;
 
-  // Stamp Box
   doc.setDrawColor(100, 100, 100);
   doc.setLineWidth(0.2);
   doc.setLineDashPattern([2, 2], 0);
   doc.rect(stampX, sigBoxY, 60, 32);
-  doc.setLineDashPattern([], 0); // reset
+  doc.setLineDashPattern([], 0);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(50, 50, 50);
   doc.text("Doctor's Stamp", stampX + 22, sigBoxY + 36);
 
-  // Signature Line
   const sigX = stampX + 68;
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.2);
@@ -232,7 +214,6 @@ export const generatePrescriptionPDF = (prescriptionState, chamber) => {
   doc.setTextColor(0, 0, 0);
   doc.text(doctorName, sigX + 10, sigBoxY + 36);
 
-  // Validity Note
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(50, 50, 50);
@@ -245,4 +226,3 @@ export const generatePrescriptionPDF = (prescriptionState, chamber) => {
 
   return doc;
 }
-

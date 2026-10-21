@@ -1,12 +1,4 @@
-/**
- * MedicineEntry.jsx
- *
- * Implements Design Spec §12.6:
- * - Repeatable medicine entry
- * - Renumbering
- * - Route options & Frequency suggestions
- * - Tab order: name → strength → dose → route → frequency → duration → instructions → Remove
- */
+
 
 import React, { useState, useRef, useEffect } from "react";
 import { Trash2, ChevronDown } from "lucide-react";
@@ -72,7 +64,7 @@ const MedicineEntry = ({
 
   return (
     <div className="w-full p-4 rounded-[6px] bg-[#F4F6F8] border border-[#D5DDE3] transition-colors duration-120">
-      {/* Header */}
+
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-[14px] leading-[20px] font-semibold text-[#14232B]">
           Medicine {index + 1}
@@ -92,9 +84,8 @@ const MedicineEntry = ({
         )}
       </div>
 
-      {/* Grid Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-4">
-        {/* Row 1: Medicine name (full width) */}
+
         <div className="md:col-span-2">
           <TextInput
             label="Medicine name"
@@ -108,7 +99,6 @@ const MedicineEntry = ({
           />
         </div>
 
-        {/* Row 2: Formulation / Strength */}
         <div>
           <TextInput
             label="Formulation / Strength"
@@ -120,7 +110,6 @@ const MedicineEntry = ({
           />
         </div>
 
-        {/* Row 2: Dose */}
         <div>
           <TextInput
             label="Dose"
@@ -132,7 +121,6 @@ const MedicineEntry = ({
           />
         </div>
 
-        {/* Row 3: Route */}
         <div>
           <SelectInput
             label="Route"
@@ -142,7 +130,6 @@ const MedicineEntry = ({
           />
         </div>
 
-        {/* Row 3: Frequency with suggestions */}
         <div ref={freqRef} className="relative">
           <TextInput
             label="Frequency"
@@ -182,7 +169,6 @@ const MedicineEntry = ({
           )}
         </div>
 
-        {/* Row 4: Duration (col 1) & Instructions (col 2) */}
         <div>
           <TextInput
             label="Duration"

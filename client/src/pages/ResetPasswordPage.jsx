@@ -1,11 +1,4 @@
-/**
- * ResetPasswordPage.jsx
- *
- * Implements Design Spec §9 (Utility screen: Reset password):
- * - Two password fields with strength checklist
- * - Reset verification OTP/token
- * - Redirect to Login with success banner
- */
+
 
 import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -15,7 +8,7 @@ import TextInput from "../components/ui/TextInput";
 import Button from "../components/ui/Button";
 import NoticeBanner from "../components/ui/NoticeBanner";
 import * as authService from "../services/authService";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../hooks/useToast";
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
